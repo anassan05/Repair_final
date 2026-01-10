@@ -27,7 +27,7 @@ const Header = ({ onBookRepair }: HeaderProps) => {
               <Laptop className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-display font-bold text-foreground">
-              Repair<span className="text-primary">Karo</span>
+              CareMyLap<span className="text-primary">.com</span>
             </span>
           </a>
 
