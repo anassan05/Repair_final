@@ -1,12 +1,36 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import HeroSection from "@/components/sections/HeroSection";
+import StatsSection from "@/components/sections/StatsSection";
+import ServicesSection from "@/components/sections/ServicesSection";
+import HowItWorksSection from "@/components/sections/HowItWorksSection";
+import MembershipSection from "@/components/sections/MembershipSection";
+import TestimonialsSection from "@/components/sections/TestimonialsSection";
+import BrandsSection from "@/components/sections/BrandsSection";
+import CTASection from "@/components/sections/CTASection";
+import BookingModal from "@/components/BookingModal";
 
 const Index = () => {
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+
+  const openBooking = () => setIsBookingOpen(true);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header onBookRepair={openBooking} />
+      <main>
+        <HeroSection onBookRepair={openBooking} />
+        <StatsSection />
+        <ServicesSection />
+        <BrandsSection />
+        <HowItWorksSection />
+        <MembershipSection />
+        <TestimonialsSection />
+        <CTASection onBookRepair={openBooking} />
+      </main>
+      <Footer />
+      <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
     </div>
   );
 };
