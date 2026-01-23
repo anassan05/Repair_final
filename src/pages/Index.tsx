@@ -11,7 +11,11 @@ import BrandsSection from "@/components/sections/BrandsSection";
 import CTASection from "@/components/sections/CTASection";
 import BookingModal from "@/components/BookingModal";
 
-const Index = () => {
+interface IndexProps {
+  currentUser: { name: string; phone: string } | null;
+}
+
+const Index = ({ currentUser }: IndexProps) => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
 
   const openBooking = () => setIsBookingOpen(true);
@@ -30,7 +34,11 @@ const Index = () => {
         <CTASection onBookRepair={openBooking} />
       </main>
       <Footer />
-      <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
+      <BookingModal 
+        isOpen={isBookingOpen} 
+        onClose={() => setIsBookingOpen(false)} 
+        currentUser={currentUser}
+      />
     </div>
   );
 };

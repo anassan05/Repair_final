@@ -123,6 +123,13 @@ const MembershipSection = () => {
                 variant={plan.popular ? "hero" : "outline"} 
                 className="w-full"
                 size="lg"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setTimeout(() => {
+                    const bookButton = document.querySelector('[data-book-button]') as HTMLElement;
+                    bookButton?.click();
+                  }, 500);
+                }}
               >
                 Get Started
               </Button>

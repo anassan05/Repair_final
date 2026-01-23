@@ -1,11 +1,13 @@
 import { ArrowRight, Shield, Clock, BadgeCheck, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface HeroSectionProps {
   onBookRepair?: () => void;
 }
 
 const HeroSection = ({ onBookRepair }: HeroSectionProps) => {
+  const navigate = useNavigate();
   const trustBadges = [
     { icon: Shield, label: "90 Days Warranty" },
     { icon: BadgeCheck, label: "Verified Technicians" },
@@ -47,7 +49,7 @@ const HeroSection = ({ onBookRepair }: HeroSectionProps) => {
                 Book a Repair
                 <ArrowRight className="w-5 h-5" />
               </Button>
-              <Button variant="outline" size="xl">
+              <Button variant="outline" size="xl" onClick={() => navigate('/profile')}>
                 View Membership
               </Button>
             </div>

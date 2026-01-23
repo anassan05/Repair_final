@@ -6,11 +6,15 @@ import {
   Cpu, 
   Wifi,
   Zap,
-  ArrowRight
+  ArrowRight,
+  Laptop,
+  PcCase
 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
-const services = [
+const laptopServices = [
   {
     icon: Monitor,
     title: "Screen Replacement",
@@ -55,7 +59,56 @@ const services = [
   },
 ];
 
+const pcServices = [
+  {
+    icon: Monitor,
+    title: "Display/Monitor Fix",
+    description: "Fix display issues, graphics card problems, and monitor connections.",
+    price: "₹1,999",
+    warranty: "90 Days",
+  },
+  {
+    icon: Cpu,
+    title: "CPU Upgrade/Repair",
+    description: "Upgrade processors or fix overheating and performance issues.",
+    price: "₹2,499",
+    warranty: "180 Days",
+  },
+  {
+    icon: HardDrive,
+    title: "Storage Solutions",
+    description: "SSD/HDD installation, upgrades, and data recovery services.",
+    price: "₹1,499",
+    warranty: "1 Year",
+  },
+  {
+    icon: Cpu,
+    title: "Motherboard Service",
+    description: "Professional motherboard repair and component replacements.",
+    price: "₹3,499",
+    warranty: "90 Days",
+  },
+  {
+    icon: Wifi,
+    title: "Network Card Fix",
+    description: "Repair or replace network cards, fix connectivity issues.",
+    price: "₹999",
+    warranty: "60 Days",
+  },
+  {
+    icon: Monitor,
+    title: "Graphics Card",
+    description: "GPU repair, upgrade, and performance optimization services.",
+    price: "₹2,999",
+    warranty: "120 Days",
+  },
+];
+
 const ServicesSection = () => {
+  const [selectedType, setSelectedType] = useState<"laptop" | "pc">("laptop");
+  const navigate = useNavigate();
+  const services = selectedType === "laptop" ? laptopServices : pcServices;
+
   return (
     <section id="services" className="py-20 lg:py-28 bg-background">
       <div className="container mx-auto px-4">
@@ -72,6 +125,34 @@ const ServicesSection = () => {
             From simple fixes to complex repairs, our certified technicians handle it all 
             with precision and care.
           </p>
+        </div>
+
+        {/* Device Type Toggle */}
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex items-center gap-2 p-1.5 bg-muted rounded-xl">
+            <button
+              onClick={() => setSelectedType("laptop")}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                selectedType === "laptop"
+                  ? "gradient-hero text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Laptop className="w-4 h-4" />
+              Laptop Services
+            </button>
+            <button
+              onClick={() => setSelectedType("pc")}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                selectedType === "pc"
+                  ? "gradient-hero text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <PcCase className="w-4 h-4" />
+              Desktop PC Services
+            </button>
+          </div>
         </div>
 
         {/* Services Grid */}
@@ -116,7 +197,7 @@ const ServicesSection = () => {
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <Button variant="hero" size="lg">
+          <Button variant="hero" size="lg" onClick={() => navigate('/services')}>
             View All Services
             <ArrowRight className="w-5 h-5" />
           </Button>

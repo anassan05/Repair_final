@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Menu, X, Phone, Laptop } from "lucide-react";
+import { Menu, X, Phone, Laptop, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface HeaderProps {
   onBookRepair?: () => void;
@@ -8,12 +9,13 @@ interface HeaderProps {
 
 const Header = ({ onBookRepair }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navLinks = [
-    { label: "Home", href: "#home" },
-    { label: "Services", href: "#services" },
-    { label: "How It Works", href: "#how-it-works" },
-    { label: "Membership", href: "#membership" },
+    { label: "Home", href: "/" },
+    { label: "Services", href: "/services" },
+    { label: "Membership", href: "/membership" },
+    { label: "Profile", href: "/profile" },
     { label: "Contact", href: "#contact" },
   ];
 
@@ -27,7 +29,7 @@ const Header = ({ onBookRepair }: HeaderProps) => {
               <Laptop className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-display font-bold text-foreground">
-              CareMyLap<span className="text-primary">.com</span>
+              TechFix<span className="text-primary">Hub</span>
             </span>
           </a>
 
@@ -37,7 +39,13 @@ const Header = ({ onBookRepair }: HeaderProps) => {
               <a
                 key={link.label}
                 href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => {
+                  if (link.href.startsWith('/')) {
+                    e.preventDefault();
+                    navigate(link.href);
+                  }
+                }}
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors cursor-pointer"
               >
                 {link.label}
               </a>
@@ -50,8 +58,21 @@ const Header = ({ onBookRepair }: HeaderProps) => {
               <Phone className="w-4 h-4" />
               +91 98765 43210
             </a>
-            <Button variant="hero" size="lg" onClick={onBookRepair}>
+            <Button variant="outline" size="lg" onClick={() => navigate('/profile')}>
+              <User className="w-4 h-4" />
+            </Button>
+            <Button variant="hero" size="lg" onClick={onBookRepair} data-book-button>
               Book Repair
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = '/';
+              }}
+            >
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
 
@@ -72,8 +93,14 @@ const Header = ({ onBookRepair }: HeaderProps) => {
                 <a
                   key={link.label}
                   href={link.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="px-4 py-3 text-base font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
+                  onClick={(e) => {
+                    if (link.href.startsWith('/')) {
+                      e.preventDefault();
+                      navigate(link.href);
+                    }
+                    setIsMenuOpen(false);
+                  }}
+                  className="px-4 py-3 text-base font-medium text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
                 >
                   {link.label}
                 </a>
@@ -83,8 +110,24 @@ const Header = ({ onBookRepair }: HeaderProps) => {
                   <Phone className="w-5 h-5 text-primary" />
                   +91 98765 43210
                 </a>
+                <Button variant="outline" size="lg" className="w-full" onClick={() => { setIsMenuOpen(false); navigate('/profile'); }}>
+                  <User className="w-4 h-4" />
+                  Profile
+                </Button>
                 <Button variant="hero" size="lg" className="w-full" onClick={() => { setIsMenuOpen(false); onBookRepair?.(); }}>
                   Book Repair
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="w-full"
+                  onClick={() => {
+                    localStorage.clear();
+                    window.location.href = '/';
+                  }}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
                 </Button>
               </div>
             </nav>
