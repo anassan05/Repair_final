@@ -1,24 +1,69 @@
-const API_BASE_URL = 'http://localhost:3000/api';
+// Mock API - using localStorage for data persistence
+const MOCK_USERS = 'mock_users';
+const MOCK_BOOKINGS = 'mock_bookings';
+
+// Helper to get mock data from localStorage
+const getStoredData = (key: string) => {
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : null;
+};
+
+// Helper to save mock data
+const saveStoredData = (key: string, data: any) => {
+  localStorage.setItem(key, JSON.stringify(data));
+};
 
 export const userAPI = {
-  // Login
+  // Login - mock with localStorage
   login: async (email: string, password: string) => {
-    const response = await fetch(`${API_BASE_URL}/user/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const users = getStoredData(MOCK_USERS) || {};
+        const user = users[email];
+
+        if (user && user.password === password) {
+          resolve({
+            success: true,
+            user: { id: user.id, name: user.name, email: user.email, phone: user.phone },
+            token: `mock-token-${email}`,
+          });
+        } else {
+          resolve({
+            success: false,
+            message: 'Invalid email or password',
+          });
+        }
+      }, 500);
     });
-    return response.json();
   },
 
-  // Register
+  // Register - mock with localStorage
   register: async (userData: { name: string; email: string; phone: string; password: string }) => {
-    const response = await fetch(`${API_BASE_URL}/user/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const users = getStoredData(MOCK_USERS) || {};
+
+        if (users[userData.email]) {
+          resolve({
+            success: false,
+            message: 'Email already registered',
+          });
+        } else {
+          const newUser = {
+            id: `user-${Date.now()}`,
+            ...userData,
+          };
+          users[userData.email] = newUser;
+          saveStoredData(MOCK_USERS, users);
+
+          resolve({
+            success: true,
+            user: { id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone },
+            token: `mock-token-${userData.email}`,
+          });
+        }
+      }, 500);
     });
-    return response.json();
   },
 
   // Create booking
@@ -31,33 +76,78 @@ export const userAPI = {
     date: string;
     time: string;
   }) => {
-    const response = await fetch(`${API_BASE_URL}/user/bookings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bookingData),
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const bookings = getStoredData(MOCK_BOOKINGS) || [];
+        const newBooking = {
+          id: `booking-${Date.now()}`,
+          ...bookingData,
+          status: 'confirmed',
+          createdAt: new Date().toISOString(),
+          rating: null,
+        };
+        bookings.push(newBooking);
+        saveStoredData(MOCK_BOOKINGS, bookings);
+
+        resolve({
+          success: true,
+          booking: newBooking,
+        });
+      }, 500);
     });
-    return response.json();
   },
 
   // Get user bookings
   getBookings: async (customerId: string) => {
-    const response = await fetch(`${API_BASE_URL}/user/bookings/${customerId}`);
-    return response.json();
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const bookings = getStoredData(MOCK_BOOKINGS) || [];
+        const userBookings = bookings.filter((b: any) => b.customerId === customerId);
+
+        resolve({
+          success: true,
+          bookings: userBookings,
+        });
+      }, 300);
+    });
   },
 
   // Get booking details
   getBookingDetails: async (bookingId: string) => {
-    const response = await fetch(`${API_BASE_URL}/user/booking/${bookingId}`);
-    return response.json();
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const bookings = getStoredData(MOCK_BOOKINGS) || [];
+        const booking = bookings.find((b: any) => b.id === bookingId);
+
+        resolve(booking || {
+          success: false,
+          message: 'Booking not found',
+        });
+      }, 300);
+    });
   },
 
   // Rate booking
   rateBooking: async (bookingId: string, rating: number) => {
-    const response = await fetch(`${API_BASE_URL}/user/bookings/${bookingId}/rate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rating }),
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const bookings = getStoredData(MOCK_BOOKINGS) || [];
+        const booking = bookings.find((b: any) => b.id === bookingId);
+
+        if (booking) {
+          booking.rating = rating;
+          saveStoredData(MOCK_BOOKINGS, bookings);
+          resolve({
+            success: true,
+            booking,
+          });
+        } else {
+          resolve({
+            success: false,
+            message: 'Booking not found',
+          });
+        }
+      }, 300);
     });
-    return response.json();
   },
 };

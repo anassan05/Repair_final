@@ -134,21 +134,16 @@ body::before {
 }
 
 body.is-scrolling::before {
-  animation: scrollProgress 0.8s ease-in-out forwards;
+  animation: scrollProgress 0.15s linear forwards;
 }
 
+/* Keep interactions alive - no blocking */
 body.is-scrolling {
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 body.is-scrolling::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(59, 130, 246, 0.1), transparent 40%);
-  pointer-events: none;
-  z-index: 30;
-  animation: scrollGlow 0.8s ease-out;
+  display: none;
 }
 
 @keyframes scrollProgress {
@@ -275,11 +270,11 @@ body.is-scrolling::after {
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
   }
 
-  /* Blur effect during scroll */
+  /* Removed blur effect - use GPU acceleration instead */
   body.is-scrolling section:not(.highlight-scroll) {
-    filter: blur(1px);
-    opacity: 0.7;
-    transition: filter 0.3s ease-out, opacity 0.3s ease-out;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   /* Parallax effect for sections */

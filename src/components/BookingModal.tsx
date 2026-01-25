@@ -189,39 +189,39 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 lg:p-4 animate-in fade-in duration-300">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-black/80 backdrop-blur-lg" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-gradient-to-br from-card via-card to-card/95 rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300 border-2 border-primary/10 mx-4 sm:mx-0">
+      <div className="relative bg-gradient-to-br from-card via-card to-card/95 rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-2xl lg:max-w-3xl max-h-[95vh] lg:max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300 border-2 border-primary/10 mx-0">
         {/* Scrollable Content */}
-        <div className="max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
+        <div className="max-h-[95vh] lg:max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 w-11 h-11 rounded-full bg-background/90 backdrop-blur-sm border-2 border-border/50 flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive hover:scale-110 hover:rotate-90 transition-all duration-300 z-20 shadow-xl"
+            className="absolute top-3 lg:top-6 right-3 lg:right-6 w-9 h-9 lg:w-11 lg:h-11 rounded-full bg-background/90 backdrop-blur-sm border-2 border-border/50 flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive hover:scale-110 hover:rotate-90 transition-all duration-300 z-20 shadow-xl"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 lg:w-5 lg:h-5" />
           </button>
 
         {/* Progress Bar */}
-        <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-8 pb-6 pr-20 border-b border-border/50">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-4 lg:p-8 pb-3 lg:pb-6 pr-12 lg:pr-20 border-b border-border/50">
+          <div className="flex items-center justify-between mb-2 lg:mb-4">
             {['Device', 'Brand', 'Issue', 'Details'].map((label, idx) => {
               const stepNum = idx + 1;
               const isActive = stepNum === step;
               const isCompleted = stepNum < step;
               return (
                 <div key={idx} className="flex flex-col items-center flex-1">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm mb-2 transition-all duration-300 ${
+                  <div className={`w-7 h-7 lg:w-10 lg:h-10 rounded-full flex items-center justify-center font-bold text-xs lg:text-sm mb-1 lg:mb-2 transition-all duration-300 ${
                     isCompleted ? 'gradient-hero text-primary-foreground shadow-lg scale-110' :
                     isActive ? 'border-2 border-primary bg-primary/10 text-primary scale-110' :
                     'border-2 border-border bg-muted text-muted-foreground'
                   }`}>
                     {isCompleted ? '✓' : stepNum}
                   </div>
-                  <span className={`text-xs font-medium transition-colors ${
+                  <span className={`text-xs lg:text-sm font-medium transition-colors ${
                     isActive || isCompleted ? 'text-foreground' : 'text-muted-foreground'
                   }`}>{label}</span>
                 </div>
@@ -242,39 +242,39 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
           </div>
         </div>
 
-        <div className="p-6 pt-0">
+        <div className="p-4 lg:p-6 pt-0">
           {/* Step 0: Device Type Selection */}
           {step === 0 && (
-            <div className="space-y-8 p-8">
+            <div className="space-y-4 lg:space-y-8 p-4 lg:p-8">
               <div className="text-center">
-                <h2 className="text-3xl font-display font-bold text-foreground mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground mb-2 lg:mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Select Your Device
                 </h2>
-                <p className="text-muted-foreground text-lg">
+                <p className="text-muted-foreground text-sm lg:text-lg">
                   Which device needs expert repair?
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-6">
                 <button
                   onClick={() => {
                     setDeviceType("laptop");
                     setStep(1);
                   }}
-                  className="group relative p-10 rounded-2xl border-2 border-border hover:border-primary bg-gradient-to-br from-card to-card/50 hover:from-primary/5 hover:to-accent/5 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl overflow-hidden"
+                  className="group relative p-6 lg:p-10 rounded-2xl border-2 border-border hover:border-primary bg-gradient-to-br from-card to-card/50 hover:from-primary/5 hover:to-accent/5 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-accent/0 group-hover:from-primary/10 group-hover:to-accent/10 transition-all duration-500" />
                   <div className="relative">
-                    <div className="w-20 h-20 mx-auto rounded-2xl gradient-hero flex items-center justify-center mb-5 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-xl">
-                      <Laptop className="w-10 h-10 text-primary-foreground" />
+                    <div className="w-16 h-16 lg:w-20 lg:h-20 mx-auto rounded-2xl gradient-hero flex items-center justify-center mb-3 lg:mb-5 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-xl">
+                      <Laptop className="w-8 h-8 lg:w-10 lg:h-10 text-primary-foreground" />
                     </div>
-                    <h3 className="text-2xl font-display font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                    <h3 className="text-lg lg:text-2xl font-display font-bold text-foreground mb-2 lg:mb-3 group-hover:text-primary transition-colors">
                       Laptop
                     </h3>
-                    <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                    <p className="text-xs lg:text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                       Portable computers & notebooks
                     </p>
-                    <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="mt-3 lg:mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <span className="text-xs font-semibold text-primary">Click to select →</span>
                     </div>
                   </div>
@@ -285,20 +285,20 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                     setDeviceType("pc");
                     setStep(1);
                   }}
-                  className="group relative p-10 rounded-2xl border-2 border-border hover:border-primary bg-gradient-to-br from-card to-card/50 hover:from-primary/5 hover:to-accent/5 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl overflow-hidden"
+                  className="group relative p-6 lg:p-10 rounded-2xl border-2 border-border hover:border-primary bg-gradient-to-br from-card to-card/50 hover:from-primary/5 hover:to-accent/5 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-accent/0 group-hover:from-primary/10 group-hover:to-accent/10 transition-all duration-500" />
                   <div className="relative">
-                    <div className="w-20 h-20 mx-auto rounded-2xl gradient-hero flex items-center justify-center mb-5 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-xl">
-                      <PcCase className="w-10 h-10 text-primary-foreground" />
+                    <div className="w-16 h-16 lg:w-20 lg:h-20 mx-auto rounded-2xl gradient-hero flex items-center justify-center mb-3 lg:mb-5 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-xl">
+                      <PcCase className="w-8 h-8 lg:w-10 lg:h-10 text-primary-foreground" />
                     </div>
-                    <h3 className="text-2xl font-display font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                    <h3 className="text-lg lg:text-2xl font-display font-bold text-foreground mb-2 lg:mb-3 group-hover:text-primary transition-colors">
                       Desktop PC
                     </h3>
-                    <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                    <p className="text-xs lg:text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                       Desktop computers & workstations
                     </p>
-                    <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="mt-3 lg:mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <span className="text-xs font-semibold text-primary">Click to select →</span>
                     </div>
                   </div>
@@ -309,24 +309,24 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
 
           {/* Step 1: Brand Selection */}
           {step === 1 && (
-            <div className="space-y-8 p-8">
+            <div className="space-y-4 lg:space-y-8 p-4 lg:p-8">
               <div className="text-center">
-                <h2 className="text-3xl font-display font-bold text-foreground mb-3">
+                <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground mb-2 lg:mb-3">
                   Choose Your {deviceType === "laptop" ? "Laptop" : "PC"} Brand
                 </h2>
-                <p className="text-muted-foreground text-base">
+                <p className="text-muted-foreground text-sm lg:text-base">
                   Select your device manufacturer for accurate diagnostics
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 lg:gap-4">
                 {brands.map((brand) => {
                   const isSelected = selectedBrand === brand;
                   return (
                     <button
                       key={brand}
                       onClick={() => setSelectedBrand(brand)}
-                      className={`group relative p-5 rounded-xl border-2 text-center font-semibold transition-all duration-300 overflow-hidden ${
+                      className={`group relative p-3 lg:p-5 rounded-lg lg:rounded-xl border-2 text-center font-semibold transition-all duration-300 overflow-hidden text-sm lg:text-base ${
                         isSelected
                           ? "border-primary bg-gradient-to-br from-primary/15 to-accent/10 text-primary shadow-lg scale-105"
                           : "border-border hover:border-primary/50 bg-card hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 text-foreground hover:scale-105 hover:shadow-md"
@@ -337,32 +337,32 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                       }`}>
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10" />
                       </div>
-                      <div className="relative flex flex-col items-center gap-2">
-                        {isSelected && <Check className="w-4 h-4 absolute -top-1 -right-1" />}
-                        <span className="text-base">{brand}</span>
+                      <div className="relative flex flex-col items-center gap-1">
+                        {isSelected && <Check className="w-3 h-3 lg:w-4 lg:h-4 absolute -top-1 -right-1" />}
+                        <span>{brand}</span>
                       </div>
                     </button>
                   );
                 })}
               </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" size="lg" onClick={() => {
+              <div className="flex gap-2 lg:gap-3 flex-col sm:flex-row pt-2">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs lg:text-base" onClick={() => {
                   setStep(0);
                   setSelectedBrand("");
                 }}>
-                  <ArrowLeft className="w-5 h-5" />
+                  <ArrowLeft className="w-3 h-3 lg:w-5 lg:h-5 mr-1" />
                   Back
                 </Button>
                 <Button
                   variant="hero"
-                  size="lg"
-                  className="flex-1"
+                  size="sm"
+                  className="w-full sm:flex-1 text-xs lg:text-base"
                   disabled={!selectedBrand}
                   onClick={() => setStep(2)}
                 >
                   Continue
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-3 h-3 lg:w-5 lg:h-5 ml-1" />
                 </Button>
               </div>
             </div>
@@ -425,11 +425,11 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
               </div>
 
               {/* Image Upload */}
-              <div className="p-6 border-2 border-dashed border-border rounded-xl text-center hover:border-primary/50 hover:bg-accent/5 transition-all duration-200 cursor-pointer group">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                  <Upload className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+              <div className="p-4 lg:p-6 border-2 border-dashed border-border rounded-xl text-center hover:border-primary/50 hover:bg-accent/5 transition-all duration-200 cursor-pointer group">
+                <div className="w-9 h-9 lg:w-12 lg:h-12 mx-auto mb-2 lg:mb-3 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                  <Upload className="w-4 h-4 lg:w-6 lg:h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
-                <p className="text-sm font-medium text-foreground mb-1">
+                <p className="text-xs lg:text-sm font-medium text-foreground mb-1">
                   Upload images of the issue
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -437,23 +437,23 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                 </p>
               </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" size="lg" onClick={() => {
+              <div className="flex gap-2 lg:gap-3 flex-col sm:flex-row">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs lg:text-sm lg:text-base" onClick={() => {
                   setStep(1);
                   setSelectedIssues([]);
                 }}>
-                  <ArrowLeft className="w-5 h-5" />
+                  <ArrowLeft className="w-3 h-3 lg:w-5 lg:h-5 mr-1" />
                   Back
                 </Button>
                 <Button
                   variant="hero"
-                  size="lg"
-                  className="flex-1"
+                  size="sm"
+                  className="w-full sm:flex-1 text-xs lg:text-sm lg:text-base"
                   disabled={selectedIssues.length === 0}
                   onClick={() => setStep(3)}
                 >
                   Continue
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-3 h-3 lg:w-5 lg:h-5 ml-1" />
                 </Button>
               </div>
             </div>
@@ -672,50 +672,50 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
 
           {/* Step 4: Confirmation */}
           {step === 4 && (
-            <div className="space-y-6">
+            <div className="space-y-4 lg:space-y-6 p-4 lg:p-6">
               <div>
-                <h2 className="text-2xl font-display font-bold text-foreground mb-2">
+                <h2 className="text-xl lg:text-2xl font-display font-bold text-foreground mb-2">
                   Review & Confirm
                 </h2>
-                <p className="text-muted-foreground">
+                <p className="text-sm lg:text-base text-muted-foreground">
                   Please review your booking details before confirming.
                 </p>
               </div>
 
               {/* Price Summary */}
-              <div className="p-6 bg-gradient-to-br from-accent/10 to-primary/5 rounded-xl border-2 border-accent/30 shadow-lg">
-                <div className="flex items-center justify-between mb-4">
+              <div className="p-4 lg:p-6 bg-gradient-to-br from-accent/10 to-primary/5 rounded-lg lg:rounded-xl border-2 border-accent/30 shadow-lg">
+                <div className="flex items-center justify-between mb-3 lg:mb-4">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Estimated Price Range</p>
-                    <p className="text-2xl font-display font-bold text-foreground">
+                    <p className="text-xs lg:text-sm text-muted-foreground mb-1">Estimated Price Range</p>
+                    <p className="text-xl lg:text-2xl font-display font-bold text-foreground">
                       {deviceType === "laptop" ? "₹799 - ₹7,999" : "₹999 - ₹9,999"}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 p-3 bg-accent/20 rounded-lg">
-                  <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
-                    <Shield className="w-5 h-5 text-accent-foreground" />
+                <div className="flex items-center gap-2 p-2 lg:p-3 bg-accent/20 rounded-lg">
+                  <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-4 h-4 lg:w-5 lg:h-5 text-accent-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-accent">90 Days Warranty</p>
+                    <p className="text-xs lg:text-sm font-semibold text-accent">90 Days Warranty</p>
                     <p className="text-xs text-muted-foreground">On all repairs & parts</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" size="lg" onClick={() => setStep(2)}>
-                  <ArrowLeft className="w-5 h-5" />
+              <div className="flex gap-2 lg:gap-3 flex-col sm:flex-row pt-2">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs lg:text-base" onClick={() => setStep(2)}>
+                  <ArrowLeft className="w-3 h-3 lg:w-5 lg:h-5" />
                   Back
                 </Button>
                 <Button
                   variant="hero"
-                  size="lg"
-                  className="flex-1"
+                  size="sm"
+                  className="w-full sm:flex-1 text-xs lg:text-base"
                   onClick={handleSubmit}
                 >
                   Book Repair Now
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-3 h-3 lg:w-5 lg:h-5" />
                 </Button>
               </div>
             </div>
