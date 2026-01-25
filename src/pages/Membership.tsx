@@ -78,10 +78,10 @@ const Membership = ({ currentUser }: MembershipProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background page-enter">
       <Header />
       
-      <main className="flex-1 pt-20 sm:pt-24 pb-12 sm:pb-16">
+      <main className="pt-20 pb-8 overflow-y-auto">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">

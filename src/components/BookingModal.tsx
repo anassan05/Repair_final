@@ -87,6 +87,26 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
         phone: currentUser.phone,
       }));
     }
+
+    // Check if there's a selected service in sessionStorage
+    const selectedServiceData = sessionStorage.getItem('selectedService');
+    if (selectedServiceData) {
+      try {
+        const service = JSON.parse(selectedServiceData);
+        setDeviceType(service.type);
+        setSelectedIssues([service.title]);
+        // Store all service info in sessionStorage
+        sessionStorage.setItem('bookingData', JSON.stringify({
+          serviceTitle: service.title,
+          price: service.price,
+          warranty: service.warranty,
+          timeframe: service.timeframe,
+          type: service.type,
+        }));
+      } catch (e) {
+        console.error('Error parsing selected service:', e);
+      }
+    }
   }, [currentUser]);
   
   const brands = deviceType === "laptop" ? laptopBrands : pcBrands;
@@ -124,21 +144,34 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
       customerId = `GUEST${Date.now()}`;
     }
 
+    // Prepare booking data for session storage
+    const bookingDataToStore = {
+      customerId: customerId.toString(),
+      customerName: formData.name,
+      customerPhone: formData.phone,
+      customerAddress: addressDetails,
+      service: `${deviceType === "laptop" ? "Laptop" : "Desktop PC"} - ${selectedBrand} - ${selectedIssues.join(", ")}`,
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+      description: formData.description,
+    };
+
     try {
-      const response = await userAPI.createBooking({
-        customerId: customerId.toString(),
-        customerName: formData.name,
-        customerPhone: formData.phone,
-        customerAddress: addressDetails,
-        service: `${deviceType === "laptop" ? "Laptop" : "Desktop PC"} - ${selectedBrand} - ${selectedIssues.join(", ")}`,
-        date: new Date().toISOString().split('T')[0],
-        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-      });
+      const response = await userAPI.createBooking(bookingDataToStore);
 
       if (response.success) {
         console.log('Full booking response:', response);
         console.log('OTP from response:', response.otp);
         console.log('Booking ID from response:', response.bookingId);
+        
+        // Store complete booking data in session storage
+        sessionStorage.setItem('currentBooking', JSON.stringify({
+          ...bookingDataToStore,
+          otp: response.otp,
+          bookingId: response.bookingId,
+          createdAt: new Date().toISOString(),
+        }));
+
         setBookingOtp(response.otp || '');
         setBookingId(response.bookingId || '');
         console.log('OTP state set to:', response.otp);

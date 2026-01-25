@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Monitor, 
   Battery, 
@@ -20,6 +20,16 @@ import BookingModal from "@/components/BookingModal";
 
 interface ServicesProps {
   currentUser: { name: string; phone: string } | null;
+}
+
+interface Service {
+  icon: any;
+  title: string;
+  description: string;
+  fullDescription: string;
+  price: string;
+  warranty: string;
+  timeframe: string;
 }
 
 const laptopServices = [
@@ -140,15 +150,39 @@ const Services = ({ currentUser }: ServicesProps) => {
   const [selectedType, setSelectedType] = useState<"laptop" | "pc">("laptop");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string | null>(null);
+
+  // Initialize session storage with services data
+  useEffect(() => {
+    const servicesData = {
+      laptop: laptopServices,
+      pc: pcServices,
+    };
+    sessionStorage.setItem('servicesData', JSON.stringify(servicesData));
+    sessionStorage.setItem('lastVisitedServiceType', selectedType);
+  }, [selectedType]);
+
   const services = selectedType === "laptop" ? laptopServices : pcServices;
 
   const handleBookService = (serviceTitle: string) => {
+    // Store selected service data in session storage
+    const selectedServiceData = services.find(s => s.title === serviceTitle);
+    if (selectedServiceData) {
+      sessionStorage.setItem('selectedService', JSON.stringify({
+        title: selectedServiceData.title,
+        price: selectedServiceData.price,
+        warranty: selectedServiceData.warranty,
+        timeframe: selectedServiceData.timeframe,
+        description: selectedServiceData.description,
+        fullDescription: selectedServiceData.fullDescription,
+        type: selectedType,
+      }));
+    }
     setSelectedService(serviceTitle);
     setIsBookingOpen(true);
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col page-enter">
       <Header />
       
       <main className="flex-1">

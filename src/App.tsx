@@ -8,8 +8,8 @@ import Index from "./pages/Index";
 import Services from "./pages/Services";
 import Profile from "./pages/Profile";
 import Membership from "./pages/Membership";
+import Contact from "./pages/Contact";
 import UserLogin from "./pages/UserLogin";
-import BookingSummary from "./pages/BookingSummary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,18 +51,11 @@ const App = () => {
               currentUser ? <Navigate to="/" /> : <UserLogin onLogin={handleLogin} />
             } />
             <Route path="/" element={<Index currentUser={currentUser} />} />
-            <Route path="/services" element={<Services currentUser={currentUser} />} />
             <Route path="/profile" element={
               currentUser ? 
                 <Profile currentUser={currentUser} onLogout={handleLogout} /> : 
                 <Navigate to="/login" />
             } />
-            <Route path="/bookings" element={
-              currentUser ? 
-                <BookingSummary /> : 
-                <Navigate to="/login" />
-            } />
-            <Route path="/membership" element={<Membership currentUser={currentUser} />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

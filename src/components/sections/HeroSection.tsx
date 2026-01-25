@@ -18,57 +18,57 @@ const HeroSection = ({ onBookRepair }: HeroSectionProps) => {
     <section id="home" className="relative min-h-screen flex items-center pt-20 lg:pt-0 overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 gradient-hero opacity-[0.03]" />
-      <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl" />
+      <div className="absolute top-20 right-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[250px] h-[250px] md:w-[400px] md:h-[400px] bg-accent/5 rounded-full blur-3xl" />
       
-      <div className="container mx-auto px-4 py-12 lg:py-0">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div className="container mx-auto px-4 py-8 lg:py-0">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-20 items-center">
           {/* Content */}
-          <div className="space-y-8 animate-fade-up">
+          <div className="space-y-6 lg:space-y-8 animate-fade-up">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-              <Wrench className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Trusted by 10,000+ Customers</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full bg-primary/10 border border-primary/20">
+              <Wrench className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-primary" />
+              <span className="text-xs lg:text-sm font-medium text-primary">Trusted by 10,000+ Customers</span>
             </div>
 
             {/* Heading */}
-            <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight">
+            <div className="space-y-3 lg:space-y-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight">
                 Expert Laptop Repair at Your{" "}
                 <span className="text-gradient-primary">Doorstep</span>
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-xl">
+              <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-xl">
                 Get your laptop fixed right in front of you. Transparent pricing, 
                 genuine parts, and 90-day warranty on all repairs.
               </p>
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4">
-              <Button variant="hero" size="xl" onClick={onBookRepair}>
+            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
+              <Button variant="hero" size="lg" onClick={onBookRepair} className="w-full sm:w-auto text-base lg:text-lg">
                 Book a Repair
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" />
               </Button>
-              <Button variant="outline" size="xl" onClick={() => navigate('/profile')}>
+              <Button variant="outline" size="lg" onClick={() => navigate('/profile')} className="w-full sm:w-auto text-base lg:text-lg">
                 View Membership
               </Button>
             </div>
 
             {/* Trust Badges */}
-            <div className="flex flex-wrap gap-6 pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
               {trustBadges.map((badge) => (
-                <div key={badge.label} className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <badge.icon className="w-5 h-5 text-accent" />
+                <div key={badge.label} className="flex items-center gap-2 p-2">
+                  <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                    <badge.icon className="w-4 h-4 lg:w-5 lg:h-5 text-accent" />
                   </div>
-                  <span className="text-sm font-medium text-foreground">{badge.label}</span>
+                  <span className="text-xs lg:text-sm font-medium text-foreground">{badge.label}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Hero Image / Illustration */}
-          <div className="relative animate-fade-up" style={{ animationDelay: "0.2s" }}>
+          <div className="relative animate-fade-up hidden lg:block" style={{ animationDelay: "0.2s" }}>
             <div className="relative z-10">
               {/* Main Visual Card */}
               <div className="relative bg-card rounded-3xl shadow-xl p-8 lg:p-10 border border-border">
