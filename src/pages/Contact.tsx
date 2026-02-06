@@ -9,9 +9,9 @@ interface ContactProps {
 
 const Contact = ({ currentUser }: ContactProps) => {
   return (
-    <div className="min-h-screen bg-background page-enter">
+    <div className="min-h-screen bg-white dark:bg-background text-foreground page-enter">
       <Header />
-      
+
       <main className="pt-20 pb-8">
         {/* CTA Section */}
         <section className="bg-gradient-to-br from-primary to-primary/90 text-primary-foreground py-16 sm:py-20">
@@ -23,7 +23,7 @@ const Contact = ({ currentUser }: ContactProps) => {
               <p className="text-lg sm:text-xl mb-10 opacity-95">
                 Book a repair now and get your laptop working like new. Our experts are just a call away.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <a href="tel:+919876543210">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto text-base">

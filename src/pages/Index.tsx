@@ -54,7 +54,7 @@ const Index = ({ currentUser }: IndexProps) => {
   }, [location.hash]);
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-background overflow-hidden">
       <Header onBookRepair={openBooking} />
       <ScrollIndicator />
       <main className="page-enter">
@@ -84,9 +84,9 @@ const Index = ({ currentUser }: IndexProps) => {
         </section>
       </main>
       <Footer />
-      <BookingModal 
-        isOpen={isBookingOpen} 
-        onClose={() => setIsBookingOpen(false)} 
+      <BookingModal
+        isOpen={isBookingOpen}
+        onClose={() => setIsBookingOpen(false)}
         currentUser={currentUser}
       />
     </div>

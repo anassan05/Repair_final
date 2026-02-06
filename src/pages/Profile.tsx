@@ -273,7 +273,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-background text-foreground flex flex-col">
       <Header />
       
       <main className="flex-1 pt-24 pb-16">

@@ -29,7 +29,7 @@ const StatsSection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-16 gradient-dark">
+    <section ref={sectionRef} className="py-16 bg-gradient-to-br from-primary to-primary/90 text-primary-foreground">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (

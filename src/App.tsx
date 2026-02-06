@@ -11,6 +11,7 @@ import Membership from "./pages/Membership";
 import Contact from "./pages/Contact";
 import UserLogin from "./pages/UserLogin";
 import NotFound from "./pages/NotFound";
+import ImageTest from "./components/ImageTest";
 
 const queryClient = new QueryClient();
 
@@ -50,12 +51,23 @@ const App = () => {
             <Route path="/login" element={
               currentUser ? <Navigate to="/" /> : <UserLogin onLogin={handleLogin} />
             } />
-            <Route path="/" element={<Index currentUser={currentUser} />} />
-            <Route path="/profile" element={
-              currentUser ? 
-                <Profile currentUser={currentUser} onLogout={handleLogout} /> : 
-                <Navigate to="/login" />
+            {/* All main routes require login */}
+            <Route path="/" element={
+              currentUser ? <Index currentUser={currentUser} /> : <Navigate to="/login" />
             } />
+            <Route path="/services" element={
+              currentUser ? <Services currentUser={currentUser} /> : <Navigate to="/login" />
+            } />
+            <Route path="/membership" element={
+              currentUser ? <Membership currentUser={currentUser} /> : <Navigate to="/login" />
+            } />
+            <Route path="/contact" element={
+              currentUser ? <Contact currentUser={currentUser} /> : <Navigate to="/login" />
+            } />
+            <Route path="/profile" element={
+              currentUser ? <Profile currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/login" />
+            } />
+            <Route path="/debug" element={<ImageTest />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
