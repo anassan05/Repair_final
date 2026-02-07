@@ -123,6 +123,34 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
     let addressDetails = "";
     if (useNewAddress) {
       addressDetails = `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
+      
+      // Save new address to localStorage for profile page
+      const savedAddressesFromStorage = localStorage.getItem('userAddresses');
+      let existingAddresses = [];
+      
+      if (savedAddressesFromStorage) {
+        try {
+          existingAddresses = JSON.parse(savedAddressesFromStorage);
+        } catch (e) {
+          existingAddresses = [];
+        }
+      }
+      
+      // Create new address object
+      const newAddressObj = {
+        id: Math.max(...existingAddresses.map(a => a.id || 0), 0) + 1,
+        type: "Home", // Default type, could be made selectable
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode,
+        isDefault: existingAddresses.length === 0, // First address becomes default
+      };
+      
+      // Add to existing addresses and save back to localStorage
+      const updatedAddresses = [...existingAddresses, newAddressObj];
+      localStorage.setItem('userAddresses', JSON.stringify(updatedAddresses));
+      
     } else {
       const selectedAddress = savedAddresses.find(a => a.id === selectedAddressId);
       if (selectedAddress) {

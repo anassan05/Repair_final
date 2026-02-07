@@ -141,6 +141,43 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
   });
   const [bookings, setBookings] = useState<any[]>([]);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Load addresses from localStorage and merge with initial data
+  useEffect(() => {
+    const savedAddressesFromStorage = localStorage.getItem('userAddresses');
+    if (savedAddressesFromStorage) {
+      try {
+        const savedAddresses = JSON.parse(savedAddressesFromStorage);
+        // Merge saved addresses with existing ones, avoiding duplicates
+        const mergedAddresses = [...initialUserData.addresses];
+        
+        savedAddresses.forEach((savedAddr: Address) => {
+          // Check if address already exists (by comparing full address)
+          const exists = mergedAddresses.some(existing => 
+            existing.address === savedAddr.address && 
+            existing.city === savedAddr.city && 
+            existing.pincode === savedAddr.pincode
+          );
+          
+          if (!exists) {
+            mergedAddresses.push(savedAddr);
+          }
+        });
+        
+        setUserData({
+          ...userData,
+          addresses: mergedAddresses,
+        });
+      } catch (e) {
+        console.error('Error loading saved addresses:', e);
+      }
+    }
+  }, []);
+
   // Load bookings from backend API
   useEffect(() => {
     const loadBookings = async () => {

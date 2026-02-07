@@ -14,43 +14,7 @@ const Contact = ({ currentUser }: ContactProps) => {
 
       <main className="pt-20 pb-8">
         {/* CTA Section */}
-        <section className="bg-gradient-to-br from-primary to-primary/90 text-primary-foreground py-16 sm:py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto text-center">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-6">
-                Ready to Get Your Laptop Fixed?
-              </h1>
-              <p className="text-lg sm:text-xl mb-10 opacity-95">
-                Book a repair now and get your laptop working like new. Our experts are just a call away.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                <a href="tel:+919876543210">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto text-base">
-                    <Phone className="w-5 h-5 mr-2" />
-                    Call Us Now
-                  </Button>
-                </a>
-                <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-gray-100 text-base">
-                  <ArrowRight className="w-5 h-5 mr-2" />
-                  Book Repair Online
-                </Button>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm sm:text-base">
-                <a href="tel:+919876543210" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <Phone className="w-4 h-4" />
-                  +91 98765 43210
-                </a>
-                <span className="hidden sm:inline">•</span>
-                <a href="https://wa.me/919876543210" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <MessageCircle className="w-4 h-4" />
-                  WhatsApp Support
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
+        <CTASection />
 
         {/* Contact Information Section */}
         <section className="py-16 sm:py-20">
@@ -118,6 +82,49 @@ const Contact = ({ currentUser }: ContactProps) => {
 
       <Footer />
     </div>
+  );
+};
+
+// CTA Section Component
+const CTASection = () => {
+  return (
+    <section className="bg-gradient-to-br from-primary to-primary/90 text-primary-foreground py-16 sm:py-20">
+      <div className="container mx-auto px-4">
+        <div className="max-w-2xl mx-auto text-center">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-6">
+            Ready to Get Your Laptop Fixed?
+          </h1>
+          <p className="text-lg sm:text-xl mb-10 opacity-95">
+            Book a repair now and get your laptop working like new. Our experts are just a call away.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <a href="tel:+919876543210">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-base">
+                <Phone className="w-5 h-5 mr-2" />
+                Call Us Now
+              </Button>
+            </a>
+            <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-gray-100 text-base">
+              <ArrowRight className="w-5 h-5 mr-2" />
+              Book Repair Online
+            </Button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm sm:text-base">
+            <a href="tel:+919876543210" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Phone className="w-4 h-4" />
+              +91 98765 43210
+            </a>
+            <span className="hidden sm:inline">•</span>
+            <a href="https://wa.me/919876543210" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp Support
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 
