@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   User, 
   Mail, 
@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useNavigate } from "react-router-dom";
+import { indianStatesAndDistricts, allStates } from "@/data/indianLocations";
 
 // Mock user data
 const initialUserData = {
@@ -86,6 +87,36 @@ interface ProfileProps {
 
 const mockRepairHistory = [
   {
+    id: "REP-2026-012",
+    device: "Laptop - Dell Inspiron 15",
+    issue: "Motherboard Repair",
+    date: "2026-02-10",
+    status: "Active",
+    cost: "₹6,499",
+    discount: "₹1,300",
+    rating: 0,
+  },
+  {
+    id: "REP-2026-009",
+    device: "Desktop PC - Custom Build",
+    issue: "Power Supply Replacement",
+    date: "2026-02-05",
+    status: "Active",
+    cost: "₹2,999",
+    discount: "₹600",
+    rating: 0,
+  },
+  {
+    id: "REP-2026-007",
+    device: "Laptop - ASUS ROG Strix",
+    issue: "Overheating Fix & Thermal Paste",
+    date: "2026-01-28",
+    status: "Active",
+    cost: "₹1,499",
+    discount: "₹300",
+    rating: 0,
+  },
+  {
     id: "REP-2026-001",
     device: "Laptop - Dell Inspiron",
     issue: "Screen Replacement",
@@ -97,13 +128,23 @@ const mockRepairHistory = [
   },
   {
     id: "REP-2025-087",
-    device: "Desktop PC - Custom Build",
+    device: "Desktop PC - HP Omen",
     issue: "Graphics Card Upgrade",
     date: "2025-12-20",
     status: "Completed",
     cost: "₹5,999",
     discount: "₹1,200",
     rating: 5,
+  },
+  {
+    id: "REP-2025-072",
+    device: "Laptop - Lenovo ThinkPad",
+    issue: "SSD Upgrade & Data Migration",
+    date: "2025-12-01",
+    status: "Completed",
+    cost: "₹4,299",
+    discount: "₹860",
+    rating: 4,
   },
   {
     id: "REP-2025-065",
@@ -114,6 +155,16 @@ const mockRepairHistory = [
     cost: "₹2,799",
     discount: "₹560",
     rating: 4,
+  },
+  {
+    id: "REP-2025-051",
+    device: "Desktop PC - Custom Build",
+    issue: "RAM Upgrade (16GB to 32GB)",
+    date: "2025-10-22",
+    status: "Completed",
+    cost: "₹3,199",
+    discount: "₹640",
+    rating: 5,
   },
 ];
 
@@ -140,6 +191,11 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
     isDefault: false,
   });
   const [bookings, setBookings] = useState<any[]>([]);
+  const [repairFilter, setRepairFilter] = useState<"all" | "active" | "completed">("active");
+  const [showStateSuggestions, setShowStateSuggestions] = useState(false);
+  const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
+  const stateInputRef = useRef<HTMLDivElement>(null);
+  const districtInputRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -178,38 +234,10 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
     }
   }, []);
 
-  // Load bookings from backend API
+  // Load dummy repair history
   useEffect(() => {
-    const loadBookings = async () => {
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (user.id) {
-          const response = await fetch(`http://localhost:3000/api/user/bookings/${user.id}`);
-          const data = await response.json();
-          if (data.success) {
-            // Transform backend data to match UI format
-            const transformedBookings = data.bookings.map((b: any) => ({
-              id: b.id,
-              device: b.service.split(' - ')[0] + ' - ' + b.service.split(' - ')[1],
-              issue: b.service.split(' - ').slice(2).join(', '),
-              date: b.date,
-              status: b.status.charAt(0).toUpperCase() + b.status.slice(1),
-              cost: b.amount ? `₹${b.amount}` : 'TBD',
-              discount: '₹0',
-              rating: b.rating || 0,
-            }));
-            setBookings([...transformedBookings, ...mockRepairHistory]);
-            return;
-          }
-        }
-      } catch (error) {
-        console.error('Error loading bookings:', error);
-      }
-      // Fallback to mock data
-      setBookings(mockRepairHistory);
-    };
-    loadBookings();
-  }, [currentUser.phone]);
+    setBookings(mockRepairHistory);
+  }, []);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -299,13 +327,15 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Completed":
-        return "bg-accent/10 text-accent border-accent/20";
+        return "bg-green-100 text-green-700 border-green-200 hover:bg-green-100";
+      case "Active":
+        return "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100";
       case "In Progress":
-        return "bg-warning/10 text-warning border-warning/20";
+        return "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100";
       case "Pending":
-        return "bg-primary/10 text-primary border-primary/20";
+        return "bg-primary/10 text-primary border-primary/20 hover:bg-primary/10";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted text-muted-foreground border-border hover:bg-muted";
     }
   };
 
@@ -404,48 +434,37 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
           </Card>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <Card className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <Card className="p-2 sm:p-4">
+              <div className="flex flex-col items-center text-center sm:flex-row sm:text-left gap-1 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Wrench className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-lg sm:text-xl font-bold">{userData.stats.totalRepairs}</p>
-                  <p className="text-xs text-muted-foreground">Repairs</p>
+                  <p className="text-sm sm:text-xl font-bold">{userData.stats.totalRepairs}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Repairs</p>
                 </div>
               </div>
             </Card>
-            <Card className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+            <Card className="p-2 sm:p-4">
+              <div className="flex flex-col items-center text-center sm:flex-row sm:text-left gap-1 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
                   <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                 </div>
                 <div>
-                  <p className="text-lg sm:text-xl font-bold">{userData.stats.totalSpent}</p>
-                  <p className="text-xs text-muted-foreground">Spent</p>
+                  <p className="text-sm sm:text-xl font-bold">{userData.stats.totalSpent}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Spent</p>
                 </div>
               </div>
             </Card>
-            <Card className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
+            <Card className="p-2 sm:p-4">
+              <div className="flex flex-col items-center text-center sm:flex-row sm:text-left gap-1 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
                   <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
                 </div>
                 <div>
-                  <p className="text-lg sm:text-xl font-bold">{userData.stats.savedAmount}</p>
-                  <p className="text-xs text-muted-foreground">Saved</p>
-                </div>
-              </div>
-            </Card>
-            <Card className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-success/10 flex items-center justify-center flex-shrink-0">
-                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
-                </div>
-                <div>
-                  <p className="text-lg sm:text-xl font-bold">{userData.stats.avgRating}</p>
-                  <p className="text-xs text-muted-foreground">Rating</p>
+                  <p className="text-sm sm:text-xl font-bold">{userData.stats.savedAmount}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Saved</p>
                 </div>
               </div>
             </Card>
@@ -539,21 +558,75 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">City</label>
-                      <Input
-                        placeholder="City"
-                        value={newAddress.city}
-                        onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                      />
-                    </div>
-                    <div>
+                    <div ref={stateInputRef} className="relative">
                       <label className="text-sm font-medium mb-1 block">State</label>
                       <Input
-                        placeholder="State"
+                        placeholder="Type to search state..."
                         value={newAddress.state}
-                        onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                        onChange={(e) => {
+                          setNewAddress({ ...newAddress, state: e.target.value, city: "" });
+                          setShowStateSuggestions(true);
+                          setShowDistrictSuggestions(false);
+                        }}
+                        onFocus={() => setShowStateSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowStateSuggestions(false), 200)}
                       />
+                      {showStateSuggestions && (
+                        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-md border bg-popover shadow-lg">
+                          {allStates
+                            .filter(s => s.toLowerCase().includes(newAddress.state.toLowerCase()))
+                            .map(state => (
+                              <div
+                                key={state}
+                                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                                onMouseDown={() => {
+                                  setNewAddress({ ...newAddress, state, city: "" });
+                                  setShowStateSuggestions(false);
+                                }}
+                              >
+                                {state}
+                              </div>
+                            ))}
+                          {allStates.filter(s => s.toLowerCase().includes(newAddress.state.toLowerCase())).length === 0 && (
+                            <div className="px-3 py-2 text-sm text-muted-foreground">No states found</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div ref={districtInputRef} className="relative">
+                      <label className="text-sm font-medium mb-1 block">District</label>
+                      <Input
+                        placeholder={newAddress.state ? "Type to search district..." : "Select state first"}
+                        value={newAddress.city}
+                        onChange={(e) => {
+                          setNewAddress({ ...newAddress, city: e.target.value });
+                          setShowDistrictSuggestions(true);
+                        }}
+                        onFocus={() => newAddress.state && setShowDistrictSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowDistrictSuggestions(false), 200)}
+                        disabled={!newAddress.state}
+                      />
+                      {showDistrictSuggestions && newAddress.state && (
+                        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-md border bg-popover shadow-lg">
+                          {(indianStatesAndDistricts[newAddress.state] || [])
+                            .filter(d => d.toLowerCase().includes(newAddress.city.toLowerCase()))
+                            .map(district => (
+                              <div
+                                key={district}
+                                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                                onMouseDown={() => {
+                                  setNewAddress({ ...newAddress, city: district });
+                                  setShowDistrictSuggestions(false);
+                                }}
+                              >
+                                {district}
+                              </div>
+                            ))}
+                          {(indianStatesAndDistricts[newAddress.state] || []).filter(d => d.toLowerCase().includes(newAddress.city.toLowerCase())).length === 0 && (
+                            <div className="px-3 py-2 text-sm text-muted-foreground">No districts found</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div>
@@ -662,14 +735,54 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
 
           {/* Repair History */}
           <Card className="p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-display font-bold mb-4">
-              Repair History ({bookings.length})
-            </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <h2 className="text-lg sm:text-xl font-display font-bold">
+                Repair History ({bookings.length})
+              </h2>
+              <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg">
+                <button
+                  onClick={() => setRepairFilter("active")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                    repairFilter === "active"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Active
+                </button>
+                <button
+                  onClick={() => setRepairFilter("completed")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                    repairFilter === "completed"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Completed
+                </button>
+                <button
+                  onClick={() => setRepairFilter("all")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                    repairFilter === "all"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  All
+                </button>
+              </div>
+            </div>
             <div className="space-y-3">
-              {bookings.map((repair) => (
+              {bookings
+                .filter((repair) => {
+                  if (repairFilter === "all") return true;
+                  if (repairFilter === "active") return repair.status.toLowerCase() !== "completed";
+                  return repair.status.toLowerCase() === "completed";
+                })
+                .map((repair) => (
                 <div 
                   key={repair.id} 
-                  className="p-3 sm:p-4 border border-border rounded-lg hover:border-primary/30 transition-colors cursor-pointer"
+                  className="p-3 sm:p-4 border border-border rounded-lg"
                   onClick={() => {
                     setSelectedRepair(repair);
                     setDetailsOpen(true);
@@ -679,7 +792,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h4 className="text-sm sm:text-base font-semibold">{repair.device}</h4>
-                        <Badge className={getStatusColor(repair.status) + " text-xs"}>
+                        <Badge className={getStatusColor(repair.status) + " text-xs pointer-events-none"}>
                           {repair.status}
                         </Badge>
                       </div>

@@ -1,4 +1,4 @@
-import { Laptop, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 
 const Footer = () => {
   const footerLinks = {
@@ -11,10 +11,10 @@ const Footer = () => {
     ],
     company: [
       { label: "About Us", href: "#" },
-      { label: "How It Works", href: "#how-it-works" },
+      { label: "How It Works", href: "#" },
       { label: "Careers", href: "#" },
       { label: "Blog", href: "#" },
-      { label: "Contact", href: "#contact" },
+      { label: "Contact", href: "#" },
     ],
     support: [
       { label: "FAQs", href: "#" },
@@ -22,9 +22,6 @@ const Footer = () => {
       { label: "Privacy Policy", href: "#" },
       { label: "Terms of Service", href: "#" },
       { label: "Refund Policy", href: "#" },
-    ],
-    admin: [
-      { label: "Admin Login", href: "http://localhost:5175", external: true },
     ],
   };
 
@@ -38,37 +35,35 @@ const Footer = () => {
   return (
     <footer className="bg-white dark:bg-[#10151b] text-gray-800 dark:text-gray-100 border-t border-gray-200 dark:border-gray-800">
       <div className="container mx-auto px-4 py-8 sm:py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 sm:gap-10 lg:gap-12">
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <a href="#home" className="flex items-center gap-2 mb-4 sm:mb-6">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                <Laptop className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-300" />
-              </div>
-              <span className="text-lg sm:text-xl font-display font-bold text-gray-900 dark:text-white">
-                CareMyLap<span className="text-blue-500 dark:text-blue-400">.com</span>
-              </span>
-            </a>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base mb-4 sm:mb-6 max-w-sm">
-              Expert laptop repair services at your doorstep. Transparent pricing,
-              genuine parts, and warranty on all repairs.
-            </p>
-            <div className="space-y-2 sm:space-y-3">
-              <a href="tel:+919876543210" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base text-gray-700 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
-                <Phone className="w-4 h-4 flex-shrink-0" />
-                +91 98765 43210
-              </a>
-              <a href="mailto:support@caremylap.com" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base text-gray-700 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
-                <Mail className="w-4 h-4 flex-shrink-0" />
-                support@caremylap.com
-              </a>
-              <div className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-gray-700 dark:text-gray-200">
-                <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
-                <span>Delhi NCR, Mumbai, Bangalore, Hyderabad</span>
-              </div>
-            </div>
+        {/* Top section: Brand + Contact */}
+        <div className="mb-8 sm:mb-10">
+          <a href="#home" className="flex items-center mb-4">
+            <span className="text-lg sm:text-xl font-display font-bold text-gray-900 dark:text-white">
+              CareMyLap<span className="text-blue-500 dark:text-blue-400">.com</span>
+            </span>
+          </a>
+          <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base mb-4 max-w-md">
+            Expert laptop & PC repair services at your doorstep. Transparent pricing,
+            genuine parts, and warranty on all repairs.
+          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm text-gray-700 dark:text-gray-200">
+            <span className="flex items-center gap-2">
+              <Phone className="w-4 h-4 flex-shrink-0" />
+              +91 12345 67890
+            </span>
+            <span className="flex items-center gap-2">
+              <Mail className="w-4 h-4 flex-shrink-0" />
+              support@caremylap.com
+            </span>
+            <span className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 flex-shrink-0" />
+              Pan India Service
+            </span>
           </div>
+        </div>
 
+        {/* Links grid */}
+        <div className="grid grid-cols-3 gap-6 sm:gap-10 border-t border-gray-200 dark:border-gray-800 pt-8">
           {/* Services */}
           <div>
             <h4 className="text-sm sm:text-base font-display font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Services</h4>
@@ -100,33 +95,11 @@ const Footer = () => {
           {/* Support */}
           <div>
             <h4 className="text-sm sm:text-base font-display font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Support</h4>
-            <ul className="space-y-2 sm:space-y-2 sm:space-y-3">
+            <ul className="space-y-2 sm:space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.label}>
                   <a href={link.href} className="text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
                     {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Admin */}
-          <div>
-            <h4 className="text-sm sm:text-base font-display font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">Admin</h4>
-            <ul className="space-y-2 sm:space-y-3">
-              {footerLinks.admin.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
-                  >
-                    {link.label}
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
                   </a>
                 </li>
               ))}
@@ -137,7 +110,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm text-center md:text-left">
-            © 2025 CareMyLap.com. All rights reserved.
+            © 2026 CareMyLap.com. All rights reserved.
           </p>
           <div className="flex items-center gap-3 sm:gap-4">
             {socialLinks.map((social, index) => (

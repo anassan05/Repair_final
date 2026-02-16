@@ -1,15 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Monitor, Battery, Keyboard, HardDrive, Cpu, Wifi, Upload, ArrowRight, ArrowLeft, Shield, Check, Laptop, PcCase, MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { userAPI } from "@/services/api";
+import { indianStatesAndDistricts, allStates } from "@/data/indianLocations";
+// All data is dummy - no API calls
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser?: { name: string; phone: string } | null;
+  preselectedService?: {
+    title: string;
+    type: "laptop" | "pc";
+  } | null;
 }
 
 // Mock saved addresses (in real app, this would come from user context/state)
@@ -57,7 +62,24 @@ const pcRepairIssues = [
   { icon: Shield, label: "Not Sure / Need Diagnosis", description: "Let our technician identify the issue", price: "Free Checkup" },
 ];
 
-const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
+// Mapping from service page titles to booking modal issue labels
+const serviceToIssueMapping: { [key: string]: { laptop: string; pc: string } } = {
+  "Screen Replacement": { laptop: "Screen Issue", pc: "Display Issue" },
+  "Battery Replacement": { laptop: "Battery Problem", pc: "CPU Problem" },
+  "Keyboard Repair": { laptop: "Keyboard Fix", pc: "CPU Problem" },
+  "SSD/HDD Upgrade": { laptop: "Storage/HDD", pc: "Storage/HDD" },
+  "Motherboard Repair": { laptop: "Motherboard", pc: "Motherboard" },
+  "WiFi/Network Fix": { laptop: "WiFi/Network", pc: "Network Card" },
+  "Display/Monitor Fix": { laptop: "Screen Issue", pc: "Display Issue" },
+  "CPU Upgrade/Repair": { laptop: "Motherboard", pc: "CPU Problem" },
+  "Storage Solutions": { laptop: "Storage/HDD", pc: "Storage/HDD" },
+  "Motherboard Service": { laptop: "Motherboard", pc: "Motherboard" },
+  "Network Card Fix": { laptop: "WiFi/Network", pc: "Network Card" },
+  "Graphics Card": { laptop: "Screen Issue", pc: "Graphics Card" },
+};
+
+const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: BookingModalProps) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
   const [deviceType, setDeviceType] = useState<"laptop" | "pc" | "">("");
   const [selectedBrand, setSelectedBrand] = useState("");
@@ -68,6 +90,11 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
     savedAddresses.find(a => a.isDefault)?.id || null
   );
   const [useNewAddress, setUseNewAddress] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showStateSuggestions, setShowStateSuggestions] = useState(false);
+  const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
+  const stateInputRef = useRef<HTMLDivElement>(null);
+  const districtInputRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     name: currentUser?.name || "",
     phone: currentUser?.phone || "",
@@ -76,7 +103,65 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
     state: "",
     pincode: "",
     description: "",
+    image: null as File | null,
   });
+
+  // Handle modal state and preselected service
+  useEffect(() => {
+    console.log('BookingModal useEffect triggered:', { isOpen, preselectedService, currentUser: currentUser?.name });
+    
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    if (!isOpen) {
+      // Reset all states when modal closes
+      console.log('Modal closing - resetting state');
+      setStep(0);
+      setDeviceType("");
+      setSelectedBrand("");
+      setSelectedIssues([]);
+      setBookingOtp("");
+      setBookingId("");
+      setUseNewAddress(false);
+      setImagePreview(null);
+      setFormData({
+        name: currentUser?.name || "",
+        phone: currentUser?.phone || "",
+        address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        description: "",
+        image: null,
+      });
+      return;
+    }
+
+    // When modal opens, pre-populate issue and skip device selection if service was clicked
+    if (preselectedService) {
+      const mapping = serviceToIssueMapping[preselectedService.title];
+      const issueLabel = mapping ? mapping[preselectedService.type] : preselectedService.title;
+      
+      setDeviceType(preselectedService.type);
+      setSelectedIssues([issueLabel]);
+      setStep(1); // Skip device selection, go straight to brand
+    } else {
+      setSelectedIssues([]);
+      setStep(0);
+    }
+
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen, preselectedService, currentUser]);
+
+  // Reset scroll position when step changes
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [step]);
 
   // Update form data when currentUser changes
   useEffect(() => {
@@ -87,35 +172,40 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
         phone: currentUser.phone,
       }));
     }
-
-    // Check if there's a selected service in sessionStorage
-    const selectedServiceData = sessionStorage.getItem('selectedService');
-    if (selectedServiceData) {
-      try {
-        const service = JSON.parse(selectedServiceData);
-        setDeviceType(service.type);
-        setSelectedIssues([service.title]);
-        // Store all service info in sessionStorage
-        sessionStorage.setItem('bookingData', JSON.stringify({
-          serviceTitle: service.title,
-          price: service.price,
-          warranty: service.warranty,
-          timeframe: service.timeframe,
-          type: service.type,
-        }));
-      } catch (e) {
-        console.error('Error parsing selected service:', e);
-      }
-    }
   }, [currentUser]);
   
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFormData(prev => ({ ...prev, image: file }));
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const brands = deviceType === "laptop" ? laptopBrands : pcBrands;
   const repairIssues = deviceType === "laptop" ? laptopRepairIssues : pcRepairIssues;
 
   const toggleIssue = (issue: string) => {
-    setSelectedIssues(prev =>
-      prev.includes(issue) ? prev.filter(i => i !== issue) : [...prev, issue]
-    );
+    // If "Not Sure" is selected, deselect everything else
+    if (issue.includes("Not Sure")) {
+      setSelectedIssues([issue]);
+      return;
+    }
+    
+    // If another issue is selected, deselect "Not Sure"
+    setSelectedIssues(prev => {
+      const newIssues = prev.filter(i => !i.includes("Not Sure"));
+      if (newIssues.includes(issue)) {
+        return newIssues.filter(i => i !== issue);
+      } else {
+        return [...newIssues, issue];
+      }
+    });
   };
 
   const handleSubmit = async () => {
@@ -184,37 +274,25 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
       description: formData.description,
     };
 
-    try {
-      const response = await userAPI.createBooking(bookingDataToStore);
+    // Simulate dummy booking success
+    const dummyBookingId = `BK-${Date.now().toString().slice(-6)}`;
+    const dummyOtp = Math.floor(1000 + Math.random() * 9000).toString();
 
-      if (response.success) {
-        console.log('Full booking response:', response);
-        console.log('OTP from response:', response.otp);
-        console.log('Booking ID from response:', response.bookingId);
-        
-        // Store complete booking data in session storage
-        sessionStorage.setItem('currentBooking', JSON.stringify({
-          ...bookingDataToStore,
-          otp: response.otp,
-          bookingId: response.bookingId,
-          createdAt: new Date().toISOString(),
-        }));
+    sessionStorage.setItem('currentBooking', JSON.stringify({
+      ...bookingDataToStore,
+      otp: dummyOtp,
+      bookingId: dummyBookingId,
+      createdAt: new Date().toISOString(),
+    }));
 
-        setBookingOtp(response.otp || '');
-        setBookingId(response.bookingId || '');
-        console.log('OTP state set to:', response.otp);
-        setStep(5); // Show success
-      } else {
-        alert('Error creating booking: ' + (response.message || 'Unknown error'));
-        console.error('Booking error:', response);
-      }
-    } catch (error) {
-      console.error('Error creating booking:', error);
-      alert('Error creating booking. Please try again.');
-    }
+    setBookingOtp(dummyOtp);
+    setBookingId(dummyBookingId);
+    setStep(5); // Show success
   };
 
   if (!isOpen) return null;
+
+  console.log('Rendering BookingModal - Step:', step, 'DeviceType:', deviceType, 'Issues:', selectedIssues);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 lg:p-4 animate-in fade-in duration-300">
@@ -222,9 +300,9 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
       <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-black/80 backdrop-blur-lg" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-gradient-to-br from-card via-card to-card/95 rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-2xl lg:max-w-3xl max-h-[95vh] lg:max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300 border-2 border-primary/10 mx-0">
+      <div className="relative bg-gradient-to-br from-card via-card to-card/95 rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-2xl lg:max-w-3xl max-h-[85vh] lg:max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-300 border-2 border-primary/10 mx-auto">
         {/* Scrollable Content */}
-        <div className="max-h-[95vh] lg:max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
+        <div ref={scrollRef} className="max-h-[85vh] lg:max-h-[85vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
           {/* Close Button */}
           <button
             onClick={onClose}
@@ -287,6 +365,10 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                 <button
                   onClick={() => {
                     setDeviceType("laptop");
+                    setSelectedBrand("");
+                    setSelectedIssues([]);
+                    setImagePreview(null);
+                    setFormData(prev => ({ ...prev, image: null, description: "" }));
                     setStep(1);
                   }}
                   className="group relative p-6 lg:p-10 rounded-2xl border-2 border-border hover:border-primary bg-gradient-to-br from-card to-card/50 hover:from-primary/5 hover:to-accent/5 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl overflow-hidden"
@@ -311,6 +393,10 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                 <button
                   onClick={() => {
                     setDeviceType("pc");
+                    setSelectedBrand("");
+                    setSelectedIssues([]);
+                    setImagePreview(null);
+                    setFormData(prev => ({ ...prev, image: null, description: "" }));
                     setStep(1);
                   }}
                   className="group relative p-6 lg:p-10 rounded-2xl border-2 border-border hover:border-primary bg-gradient-to-br from-card to-card/50 hover:from-primary/5 hover:to-accent/5 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl overflow-hidden"
@@ -350,11 +436,14 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 lg:gap-4">
                 {brands.map((brand) => {
                   const isSelected = selectedBrand === brand;
+                  const isLast = brand === "Other";
                   return (
                     <button
                       key={brand}
                       onClick={() => setSelectedBrand(brand)}
                       className={`group relative p-3 lg:p-5 rounded-lg lg:rounded-xl border-2 text-center font-semibold transition-all duration-300 overflow-hidden text-sm lg:text-base ${
+                        isLast ? "col-span-2 sm:col-span-1 max-w-[60%] sm:max-w-none mx-auto sm:mx-0 w-full" : ""
+                      } ${
                         isSelected
                           ? "border-primary bg-gradient-to-br from-primary/15 to-accent/10 text-primary shadow-lg scale-105"
                           : "border-border hover:border-primary/50 bg-card hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 text-foreground hover:scale-105 hover:shadow-md"
@@ -374,10 +463,13 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                 })}
               </div>
 
-              <div className="flex gap-2 lg:gap-3 flex-col sm:flex-row pt-2">
-                <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs lg:text-base" onClick={() => {
+              <div className="flex gap-2 lg:gap-3 pt-2">
+                <Button variant="outline" size="sm" className="flex-1 sm:flex-none sm:w-auto text-xs lg:text-base" onClick={() => {
                   setStep(0);
                   setSelectedBrand("");
+                  setSelectedIssues([]);
+                  setImagePreview(null);
+                  setFormData(prev => ({ ...prev, image: null, description: "" }));
                 }}>
                   <ArrowLeft className="w-3 h-3 lg:w-5 lg:h-5 mr-1" />
                   Back
@@ -385,7 +477,7 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                 <Button
                   variant="hero"
                   size="sm"
-                  className="w-full sm:flex-1 text-xs lg:text-base"
+                  className="flex-[2] sm:flex-1 text-xs lg:text-base"
                   disabled={!selectedBrand}
                   onClick={() => setStep(2)}
                 >
@@ -398,17 +490,17 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
 
           {/* Step 2: Issue Selection */}
           {step === 2 && (
-            <div className="space-y-8 p-8">
+            <div className="space-y-4 sm:space-y-8 p-4 sm:p-8">
               <div className="text-center">
-                <h2 className="text-3xl font-display font-bold text-foreground mb-3">
+                <h2 className="text-xl sm:text-3xl font-display font-bold text-foreground mb-1 sm:mb-3">
                   What's the Problem?
                 </h2>
-                <p className="text-muted-foreground text-base">
+                <p className="text-muted-foreground text-xs sm:text-base">
                   Select all issues that apply • Multiple selections allowed
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3">
                 {repairIssues.map((issue) => {
                   const isSelected = selectedIssues.includes(issue.label);
                   const isNotSure = issue.label.includes("Not Sure");
@@ -416,31 +508,34 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                     <button
                       key={issue.label}
                       onClick={() => toggleIssue(issue.label)}
-                      className={`group relative p-5 rounded-xl border-2 text-left transition-all duration-300 overflow-hidden ${
+                      className={`group relative rounded-xl border-2 transition-all duration-300 overflow-hidden ${
                         isSelected
-                          ? "border-primary bg-gradient-to-br from-primary/10 to-accent/5 shadow-lg scale-[1.02]"
-                          : "border-border hover:border-primary/40 bg-card hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 hover:scale-[1.02] hover:shadow-md"
-                      } ${isNotSure ? "md:col-span-2 bg-gradient-to-r from-accent/5 to-warning/5" : ""}`}
+                          ? "border-primary bg-gradient-to-br from-primary/10 to-accent/5 shadow-lg sm:scale-[1.02]"
+                          : "border-border hover:border-primary/40 bg-card hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 sm:hover:scale-[1.02] hover:shadow-md"
+                      } ${isNotSure ? "col-span-2 bg-gradient-to-r from-accent/5 to-warning/5" : ""} ${
+                        isNotSure ? "p-3 sm:p-5" : "p-3 sm:p-5"
+                      }`}
                     >
                       {isSelected && (
-                        <div className="absolute top-3 right-3 w-6 h-6 rounded-full gradient-hero flex items-center justify-center shadow-md">
-                          <Check className="w-4 h-4 text-primary-foreground" />
+                        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 rounded-full gradient-hero flex items-center justify-center shadow-md z-10">
+                          <Check className="w-3 h-3 sm:w-4 sm:h-4 text-primary-foreground" />
                         </div>
                       )}
-                      <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                          isSelected ? "gradient-hero text-primary-foreground shadow-lg scale-110" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                      {/* Mobile: centered vertical, Desktop: horizontal */}
+                      <div className={`flex ${isNotSure ? "flex-row items-center gap-3" : "flex-col items-center text-center"} sm:flex-row sm:items-start sm:text-left sm:gap-4`}>
+                        <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                          isSelected ? "gradient-hero text-primary-foreground shadow-lg sm:scale-110" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
                         }`}>
-                          <issue.icon className="w-6 h-6" />
+                          <issue.icon className="w-4 h-4 sm:w-6 sm:h-6" />
                         </div>
-                        <div className="flex-1 pr-8">
-                          <p className={`font-semibold text-base mb-2 transition-colors ${
+                        <div className={`${isNotSure ? "flex-1 text-left" : "mt-2 sm:mt-0"} sm:flex-1 sm:pr-8`}>
+                          <p className={`font-semibold text-xs sm:text-base mb-0.5 sm:mb-2 transition-colors leading-tight ${
                             isSelected ? "text-primary" : "text-foreground group-hover:text-primary"
                           }`}>
                             {issue.label}
                           </p>
-                          <p className="text-xs text-muted-foreground leading-relaxed mb-2">{issue.description}</p>
-                          <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
+                          <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed mb-1 sm:mb-2 hidden sm:block">{issue.description}</p>
+                          <div className={`inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold ${
                             isNotSure ? "bg-accent/20 text-accent" : "bg-muted text-foreground"
                           }`}>
                             {issue.price}
@@ -453,22 +548,57 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
               </div>
 
               {/* Image Upload */}
-              <div className="p-4 lg:p-6 border-2 border-dashed border-border rounded-xl text-center hover:border-primary/50 hover:bg-accent/5 transition-all duration-200 cursor-pointer group">
-                <div className="w-9 h-9 lg:w-12 lg:h-12 mx-auto mb-2 lg:mb-3 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                  <Upload className="w-4 h-4 lg:w-6 lg:h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-                <p className="text-xs lg:text-sm font-medium text-foreground mb-1">
-                  Upload images of the issue
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Optional - helps us diagnose better
-                </p>
-              </div>
+              <label
+                htmlFor="issue-image-upload"
+                className="relative block p-4 lg:p-6 border-2 border-dashed border-border rounded-xl text-center hover:border-primary/50 hover:bg-accent/5 transition-all duration-200 cursor-pointer group"
+              >
+                <input
+                  type="file"
+                  id="issue-image-upload"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                {imagePreview ? (
+                  <div className="space-y-3">
+                    <img src={imagePreview} alt="Issue preview" className="max-h-40 mx-auto rounded-lg object-contain" />
+                    <p className="text-xs text-primary font-medium">Image uploaded! Click to change</p>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setImagePreview(null);
+                        setFormData(prev => ({ ...prev, image: null }));
+                        const input = document.getElementById('issue-image-upload') as HTMLInputElement;
+                        if (input) input.value = '';
+                      }}
+                      className="text-xs text-destructive hover:underline font-medium"
+                    >
+                      Remove Image
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-9 h-9 lg:w-12 lg:h-12 mx-auto mb-2 lg:mb-3 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                      <Upload className="w-4 h-4 lg:w-6 lg:h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <p className="text-xs lg:text-sm font-medium text-foreground mb-1">
+                      Upload images of the issue
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Optional - helps us diagnose better
+                    </p>
+                  </>
+                )}
+              </label>
 
-              <div className="flex gap-2 lg:gap-3 flex-col sm:flex-row">
-                <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs lg:text-sm lg:text-base" onClick={() => {
+              <div className="flex gap-2 lg:gap-3">
+                <Button variant="outline" size="sm" className="flex-1 sm:flex-none sm:w-auto text-xs lg:text-sm lg:text-base" onClick={() => {
                   setStep(1);
                   setSelectedIssues([]);
+                  setImagePreview(null);
+                  setFormData(prev => ({ ...prev, image: null }));
                 }}>
                   <ArrowLeft className="w-3 h-3 lg:w-5 lg:h-5 mr-1" />
                   Back
@@ -476,7 +606,7 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                 <Button
                   variant="hero"
                   size="sm"
-                  className="w-full sm:flex-1 text-xs lg:text-sm lg:text-base"
+                  className="flex-[2] sm:flex-1 text-xs lg:text-sm lg:text-base"
                   disabled={selectedIssues.length === 0}
                   onClick={() => setStep(3)}
                 >
@@ -607,21 +737,75 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-sm font-medium mb-1 block">City</label>
-                          <Input
-                            placeholder="City"
-                            value={formData.city}
-                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                          />
-                        </div>
-                        <div>
+                        <div ref={stateInputRef} className="relative">
                           <label className="text-sm font-medium mb-1 block">State</label>
                           <Input
-                            placeholder="State"
+                            placeholder="Type to search state..."
                             value={formData.state}
-                            onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                            onChange={(e) => {
+                              setFormData({ ...formData, state: e.target.value, city: "" });
+                              setShowStateSuggestions(true);
+                              setShowDistrictSuggestions(false);
+                            }}
+                            onFocus={() => setShowStateSuggestions(true)}
+                            onBlur={() => setTimeout(() => setShowStateSuggestions(false), 200)}
                           />
+                          {showStateSuggestions && (
+                            <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-md border bg-popover shadow-lg">
+                              {allStates
+                                .filter(s => s.toLowerCase().includes(formData.state.toLowerCase()))
+                                .map(state => (
+                                  <div
+                                    key={state}
+                                    className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                                    onMouseDown={() => {
+                                      setFormData({ ...formData, state, city: "" });
+                                      setShowStateSuggestions(false);
+                                    }}
+                                  >
+                                    {state}
+                                  </div>
+                                ))}
+                              {allStates.filter(s => s.toLowerCase().includes(formData.state.toLowerCase())).length === 0 && (
+                                <div className="px-3 py-2 text-sm text-muted-foreground">No states found</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div ref={districtInputRef} className="relative">
+                          <label className="text-sm font-medium mb-1 block">District</label>
+                          <Input
+                            placeholder={formData.state ? "Type to search district..." : "Select state first"}
+                            value={formData.city}
+                            onChange={(e) => {
+                              setFormData({ ...formData, city: e.target.value });
+                              setShowDistrictSuggestions(true);
+                            }}
+                            onFocus={() => formData.state && setShowDistrictSuggestions(true)}
+                            onBlur={() => setTimeout(() => setShowDistrictSuggestions(false), 200)}
+                            disabled={!formData.state}
+                          />
+                          {showDistrictSuggestions && formData.state && (
+                            <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-md border bg-popover shadow-lg">
+                              {(indianStatesAndDistricts[formData.state] || [])
+                                .filter(d => d.toLowerCase().includes(formData.city.toLowerCase()))
+                                .map(district => (
+                                  <div
+                                    key={district}
+                                    className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                                    onMouseDown={() => {
+                                      setFormData({ ...formData, city: district });
+                                      setShowDistrictSuggestions(false);
+                                    }}
+                                  >
+                                    {district}
+                                  </div>
+                                ))}
+                              {(indianStatesAndDistricts[formData.state] || []).filter(d => d.toLowerCase().includes(formData.city.toLowerCase())).length === 0 && (
+                                <div className="px-3 py-2 text-sm text-muted-foreground">No districts found</div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div>
@@ -674,15 +858,15 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" size="lg" onClick={() => setStep(2)}>
-                  <ArrowLeft className="w-5 h-5" />
+              <div className="flex gap-2 lg:gap-3 pt-2">
+                <Button variant="outline" size="sm" className="flex-1 sm:flex-none sm:w-auto text-xs lg:text-base" onClick={() => setStep(2)}>
+                  <ArrowLeft className="w-3 h-3 lg:w-5 lg:h-5" />
                   Back
                 </Button>
                 <Button
                   variant="hero"
-                  size="lg"
-                  className="flex-1"
+                  size="sm"
+                  className="flex-[2] sm:flex-1 text-xs lg:text-base"
                   disabled={
                     !formData.name ||
                     !formData.phone ||
@@ -692,7 +876,7 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                   onClick={() => setStep(4)}
                 >
                   Continue
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-3 h-3 lg:w-5 lg:h-5" />
                 </Button>
               </div>
             </div>
@@ -731,15 +915,15 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
                 </div>
               </div>
 
-              <div className="flex gap-2 lg:gap-3 flex-col sm:flex-row pt-2">
-                <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs lg:text-base" onClick={() => setStep(2)}>
+              <div className="flex gap-2 lg:gap-3 pt-2">
+                <Button variant="outline" size="sm" className="flex-1 sm:flex-none sm:w-auto text-xs lg:text-base" onClick={() => setStep(2)}>
                   <ArrowLeft className="w-3 h-3 lg:w-5 lg:h-5" />
                   Back
                 </Button>
                 <Button
                   variant="hero"
                   size="sm"
-                  className="w-full sm:flex-1 text-xs lg:text-base"
+                  className="flex-[2] sm:flex-1 text-xs lg:text-base"
                   onClick={handleSubmit}
                 >
                   Book Repair Now
@@ -775,8 +959,7 @@ const BookingModal = ({ isOpen, onClose, currentUser }: BookingModalProps) => {
 
                 {/* Contact Info Card */}
                 <div className="max-w-md mx-auto space-y-4">
-                  {/* OTP Display - Debug */}
-                  {console.log('Rendering success page, bookingOtp:', bookingOtp)}
+                  {/* OTP Display */}
                   {bookingOtp ? (
                     <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-300 shadow-lg">
                       <div className="flex items-center justify-center gap-2 mb-3">

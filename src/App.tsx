@@ -11,7 +11,7 @@ import Membership from "./pages/Membership";
 import Contact from "./pages/Contact";
 import UserLogin from "./pages/UserLogin";
 import NotFound from "./pages/NotFound";
-import ImageTest from "./components/ImageTest";
+import IconTest from "./components/ImageTest";
 
 const queryClient = new QueryClient();
 
@@ -67,7 +67,7 @@ const App = () => {
             <Route path="/profile" element={
               currentUser ? <Profile currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/login" />
             } />
-            <Route path="/debug" element={<ImageTest />} />
+            <Route path="/debug" element={<IconTest />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
