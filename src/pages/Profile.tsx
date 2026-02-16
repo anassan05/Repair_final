@@ -191,7 +191,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
     isDefault: false,
   });
   const [bookings, setBookings] = useState<any[]>([]);
-  const [repairFilter, setRepairFilter] = useState<"all" | "active" | "completed">("active");
+  const [repairFilter, setRepairFilter] = useState<"all" | "active" | "completed">("all");
   const [showStateSuggestions, setShowStateSuggestions] = useState(false);
   const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
   const stateInputRef = useRef<HTMLDivElement>(null);

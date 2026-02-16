@@ -446,11 +446,11 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                       } ${
                         isSelected
                           ? "border-primary bg-gradient-to-br from-primary/15 to-accent/10 text-primary shadow-lg scale-105"
-                          : "border-border hover:border-primary/50 bg-card hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 text-foreground hover:scale-105 hover:shadow-md"
+                          : "border-border sm:hover:border-primary/50 bg-card sm:hover:bg-gradient-to-br sm:hover:from-primary/5 sm:hover:to-accent/5 text-foreground sm:hover:scale-105 sm:hover:shadow-md"
                       }`}
                     >
                       <div className={`absolute inset-0 transition-opacity duration-300 ${
-                        isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        isSelected ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'
                       }`}>
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10" />
                       </div>
