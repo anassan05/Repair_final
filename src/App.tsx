@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
+﻿import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -20,7 +20,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
+    const savedUser = sessionStorage.getItem('currentUser');
     if (savedUser) {
       setCurrentUser(JSON.parse(savedUser));
     }
@@ -29,12 +29,12 @@ const App = () => {
 
   const handleLogin = (userData: { name: string; phone: string }) => {
     setCurrentUser(userData);
-    localStorage.setItem('currentUser', JSON.stringify(userData));
+    sessionStorage.setItem('currentUser', JSON.stringify(userData));
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
-    localStorage.removeItem('currentUser');
+    sessionStorage.removeItem('currentUser');
   };
 
   if (isLoading) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Menu, X, Phone, User, LogOut, Wrench } from "lucide-react";
+import { Menu, X, Phone, User, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ interface HeaderProps {
 const Header = ({ onBookRepair }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
+  const [showContactModal, setShowContactModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -118,6 +119,42 @@ const Header = ({ onBookRepair }: HeaderProps) => {
     document.body.classList.remove('is-scrolling');
   }, [location.pathname, location.hash]);
 
+  const phoneNumber = "+91 12345 67890";
+
+  const handleCall = () => {
+    window.open(`tel:${phoneNumber.replace(/[^\d]/g, '')}`);
+  };
+  const handleWhatsApp = () => {
+    window.open(`https://wa.me/${phoneNumber.replace(/[^\d]/g, '')}`);
+  };
+  const handleCopy = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(phoneNumber);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = phoneNumber;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      toast({
+        title: "Number copied",
+        description: `${phoneNumber} copied to clipboard.`,
+      });
+    } catch {
+      toast({
+        title: "Copy failed",
+        description: "Please copy the number manually.",
+      });
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#10151b] border-b border-gray-200 dark:border-gray-800 shadow-lg animate-slide-down">
       <div className="container mx-auto px-3 lg:px-4">
@@ -168,7 +205,10 @@ const Header = ({ onBookRepair }: HeaderProps) => {
 
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-2 lg:gap-3">
-            <button onClick={() => toast({ title: "📞 Call Us Now", description: "Reach us at +91 12345 67890. Our support team is available Mon-Sat, 9 AM - 8 PM." })} className="hidden md:flex items-center gap-2 text-xs lg:text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-cyan-400 dark:hover:text-cyan-300 transition-all duration-300 hover:scale-105 group cursor-pointer">
+            <button
+              onClick={() => setShowContactModal(true)}
+              className="flex items-center gap-2 text-xs lg:text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-cyan-400 dark:hover:text-cyan-300 transition-all duration-300 hover:scale-105 group cursor-pointer"
+            >
               <Phone className="w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
               <span className="hidden lg:inline"> TECH-FIX</span>
             </button>
@@ -177,17 +217,6 @@ const Header = ({ onBookRepair }: HeaderProps) => {
             </Button>
             <Button variant="hero" size="sm" onClick={onBookRepair} data-book-button className="text-sm lg:text-base px-4 lg:px-6 py-2 lg:py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-600/30 dark:from-blue-700 dark:to-blue-900 dark:hover:from-blue-800 dark:hover:to-blue-950">
               Book Now
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              onClick={() => {
-                localStorage.clear();
-                window.location.href = '/';
-              }}
-              className="border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-800 hover:text-white dark:hover:bg-slate-700 dark:hover:text-white"
-            >
-              <LogOut className="w-4 h-4" />
             </Button>
           </div>
 
@@ -226,20 +255,25 @@ const Header = ({ onBookRepair }: HeaderProps) => {
                   <Wrench className="w-4 h-4 mr-2" />
                   Book Now
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start text-sm border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-200 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-slate-700 dark:hover:text-white"
-                  onClick={() => {
-                    localStorage.clear();
-                    window.location.href = '/';
-                  }}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Button>
               </div>
             </nav>
+          </div>
+        )}
+        {showContactModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 w-[90vw] max-w-xs flex flex-col items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Phone className="w-5 h-5 text-blue-500" />
+                <span className="font-semibold text-lg">Contact TECH-FIX</span>
+              </div>
+              <div className="text-center text-sm text-muted-foreground">{phoneNumber}</div>
+              <div className="flex gap-2 w-full">
+                <Button variant="hero" size="sm" className="flex-1" onClick={handleCall}>Call</Button>
+                <Button variant="outline" size="sm" className="flex-1" onClick={handleWhatsApp}>WhatsApp</Button>
+                <Button variant="ghost" size="sm" className="flex-1" onClick={handleCopy}>Copy</Button>
+              </div>
+              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => setShowContactModal(false)}>Close</Button>
+            </div>
           </div>
         )}
       </div>

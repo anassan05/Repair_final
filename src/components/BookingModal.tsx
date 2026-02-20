@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { X, Monitor, Battery, Keyboard, HardDrive, Cpu, Wifi, Upload, ArrowRight, ArrowLeft, Shield, Check, Laptop, PcCase, MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { indianStatesAndDistricts, allStates } from "@/data/indianLocations";
+import { useToast } from "@/hooks/use-toast";
 // All data is dummy - no API calls
 
 interface BookingModalProps {
@@ -17,48 +18,67 @@ interface BookingModalProps {
   } | null;
 }
 
-// Mock saved addresses (in real app, this would come from user context/state)
-const savedAddresses = [
-  {
-    id: 1,
-    type: "Home",
-    address: "123 Tech Street, Bangalore",
-    city: "Bangalore",
-    state: "Karnataka",
-    pincode: "560001",
-    isDefault: true,
-  },
-  {
-    id: 2,
-    type: "Office",
-    address: "45 Business Park, MG Road",
-    city: "Bangalore",
-    state: "Karnataka",
-    pincode: "560002",
-    isDefault: false,
-  },
-];
+interface SavedAddress {
+  id: number;
+  type: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+}
+
+interface BookingHistoryItem {
+  id: string;
+  device: string;
+  issue: string;
+  date: string;
+  status: "Active" | "Completed" | "In Progress" | "Pending";
+  cost: string;
+  discount: string;
+  rating: number;
+  otp: string;
+  customerName: string;
+  customerPhone: string;
+  address: string;
+  description: string;
+  createdAt: string;
+}
+
+const USER_ADDRESSES_KEY = "userAddresses";
+const USER_BOOKINGS_KEY = "userBookings";
+
+const getStoredAddresses = (): SavedAddress[] => {
+  const raw = sessionStorage.getItem(USER_ADDRESSES_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
 
 const laptopBrands = ["Dell", "HP", "Lenovo", "ASUS", "Acer", "Apple", "MSI", "Samsung", "Other"];
 const pcBrands = ["Dell", "HP", "Lenovo", "ASUS", "Acer", "Intel", "AMD", "Custom Build", "Other"];
 
 const laptopRepairIssues = [
-  { icon: Monitor, label: "Screen Issue", description: "Cracked, black, or flickering display", price: "₹2,499 - ₹5,999" },
-  { icon: Battery, label: "Battery Problem", description: "Not charging or drains quickly", price: "₹1,999 - ₹3,999" },
-  { icon: Keyboard, label: "Keyboard Fix", description: "Keys not working or stuck", price: "₹999 - ₹2,499" },
-  { icon: HardDrive, label: "Storage/HDD", description: "Slow performance or data recovery", price: "₹1,499 - ₹4,999" },
-  { icon: Cpu, label: "Motherboard", description: "Not powering on or random shutdowns", price: "₹2,999 - ₹7,999" },
-  { icon: Wifi, label: "WiFi/Network", description: "Can't connect to internet", price: "₹799 - ₹1,999" },
+  { icon: Monitor, label: "Screen Issue", description: "Cracked, black, or flickering display", price: "â‚¹2,499 - â‚¹5,999" },
+  { icon: Battery, label: "Battery Problem", description: "Not charging or drains quickly", price: "â‚¹1,999 - â‚¹3,999" },
+  { icon: Keyboard, label: "Keyboard Fix", description: "Keys not working or stuck", price: "â‚¹999 - â‚¹2,499" },
+  { icon: HardDrive, label: "Storage/HDD", description: "Slow performance or data recovery", price: "â‚¹1,499 - â‚¹4,999" },
+  { icon: Cpu, label: "Motherboard", description: "Not powering on or random shutdowns", price: "â‚¹2,999 - â‚¹7,999" },
+  { icon: Wifi, label: "WiFi/Network", description: "Can't connect to internet", price: "â‚¹799 - â‚¹1,999" },
   { icon: Shield, label: "Not Sure / Need Diagnosis", description: "Let our technician identify the issue", price: "Free Checkup" },
 ];
 
 const pcRepairIssues = [
-  { icon: Monitor, label: "Display Issue", description: "No display or screen problems", price: "₹1,999 - ₹4,999" },
-  { icon: Cpu, label: "CPU Problem", description: "Overheating or slow performance", price: "₹2,499 - ₹6,999" },
-  { icon: HardDrive, label: "Storage/HDD", description: "Slow performance or data recovery", price: "₹1,499 - ₹4,999" },
-  { icon: Cpu, label: "Motherboard", description: "Not powering on or random restarts", price: "₹3,499 - ₹8,999" },
-  { icon: Wifi, label: "Network Card", description: "Internet connectivity issues", price: "₹999 - ₹2,499" },
-  { icon: Monitor, label: "Graphics Card", description: "Display artifacts or gaming issues", price: "₹2,999 - ₹9,999" },
+  { icon: Monitor, label: "Display Issue", description: "No display or screen problems", price: "â‚¹1,999 - â‚¹4,999" },
+  { icon: Cpu, label: "CPU Problem", description: "Overheating or slow performance", price: "â‚¹2,499 - â‚¹6,999" },
+  { icon: HardDrive, label: "Storage/HDD", description: "Slow performance or data recovery", price: "â‚¹1,499 - â‚¹4,999" },
+  { icon: Cpu, label: "Motherboard", description: "Not powering on or random restarts", price: "â‚¹3,499 - â‚¹8,999" },
+  { icon: Wifi, label: "Network Card", description: "Internet connectivity issues", price: "â‚¹999 - â‚¹2,499" },
+  { icon: Monitor, label: "Graphics Card", description: "Display artifacts or gaming issues", price: "â‚¹2,999 - â‚¹9,999" },
   { icon: Shield, label: "Not Sure / Need Diagnosis", description: "Let our technician identify the issue", price: "Free Checkup" },
 ];
 
@@ -80,15 +100,15 @@ const serviceToIssueMapping: { [key: string]: { laptop: string; pc: string } } =
 
 const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: BookingModalProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>(() => getStoredAddresses());
   const [step, setStep] = useState(0);
   const [deviceType, setDeviceType] = useState<"laptop" | "pc" | "">("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
   const [bookingOtp, setBookingOtp] = useState("");
   const [bookingId, setBookingId] = useState("");
-  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
-    savedAddresses.find(a => a.isDefault)?.id || null
-  );
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showStateSuggestions, setShowStateSuggestions] = useState(false);
@@ -138,6 +158,19 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
         image: null,
       });
       return;
+    }
+
+    // Always fetch latest addresses when modal opens so Profile add/delete stays in sync.
+    const latestAddresses = getStoredAddresses();
+    setSavedAddresses(latestAddresses);
+    if (latestAddresses.length === 0) {
+      setSelectedAddressId(null);
+      setUseNewAddress(true);
+    } else {
+      const defaultAddressId = latestAddresses.find(a => a.isDefault)?.id || latestAddresses[0].id;
+      setSelectedAddressId(prev =>
+        prev && latestAddresses.some(a => a.id === prev) ? prev : defaultAddressId
+      );
     }
 
     // When modal opens, pre-populate issue and skip device selection if service was clicked
@@ -214,17 +247,8 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
     if (useNewAddress) {
       addressDetails = `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
       
-      // Save new address to localStorage for profile page
-      const savedAddressesFromStorage = localStorage.getItem('userAddresses');
-      let existingAddresses = [];
-      
-      if (savedAddressesFromStorage) {
-        try {
-          existingAddresses = JSON.parse(savedAddressesFromStorage);
-        } catch (e) {
-          existingAddresses = [];
-        }
-      }
+      // Save new address to sessionStorage for profile page
+      const existingAddresses = getStoredAddresses();
       
       // Create new address object
       const newAddressObj = {
@@ -237,9 +261,15 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
         isDefault: existingAddresses.length === 0, // First address becomes default
       };
       
-      // Add to existing addresses and save back to localStorage
+      // Add to existing addresses and save back to sessionStorage
       const updatedAddresses = [...existingAddresses, newAddressObj];
-      localStorage.setItem('userAddresses', JSON.stringify(updatedAddresses));
+      sessionStorage.setItem(USER_ADDRESSES_KEY, JSON.stringify(updatedAddresses));
+      setSavedAddresses(updatedAddresses);
+      setSelectedAddressId(newAddressObj.id);
+      toast({
+        title: "Address saved",
+        description: "New address saved for future bookings.",
+      });
       
     } else {
       const selectedAddress = savedAddresses.find(a => a.id === selectedAddressId);
@@ -248,8 +278,8 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
       }
     }
 
-    // Get user from localStorage or create guest ID
-    const userStr = localStorage.getItem('user');
+    // Get user from sessionStorage or create guest ID
+    const userStr = sessionStorage.getItem('user');
     let customerId;
     if (userStr) {
       try {
@@ -284,6 +314,41 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
       bookingId: dummyBookingId,
       createdAt: new Date().toISOString(),
     }));
+
+    // Persist booking for Profile page history.
+    const storedBookingsRaw = sessionStorage.getItem(USER_BOOKINGS_KEY);
+    let storedBookings: BookingHistoryItem[] = [];
+    if (storedBookingsRaw) {
+      try {
+        const parsed = JSON.parse(storedBookingsRaw);
+        storedBookings = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        storedBookings = [];
+      }
+    }
+
+    const newBookingHistoryItem = {
+      id: dummyBookingId,
+      device: `${deviceType === "laptop" ? "Laptop" : "Desktop PC"} - ${selectedBrand || "Unknown Brand"}`,
+      issue: selectedIssues.join(", ") || "General Service",
+      date: new Date().toISOString(),
+      status: "Active",
+      cost: "â‚¹0",
+      discount: "â‚¹0",
+      rating: 0,
+      otp: dummyOtp,
+      customerName: formData.name,
+      customerPhone: formData.phone,
+      address: addressDetails,
+      description: formData.description,
+      createdAt: new Date().toISOString(),
+    };
+
+    sessionStorage.setItem(
+      USER_BOOKINGS_KEY,
+      JSON.stringify([newBookingHistoryItem, ...storedBookings])
+    );
+    window.dispatchEvent(new Event("bookings-updated"));
 
     setBookingOtp(dummyOtp);
     setBookingId(dummyBookingId);
@@ -325,7 +390,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                     isActive ? 'border-2 border-primary bg-primary/10 text-primary scale-110' :
                     'border-2 border-border bg-muted text-muted-foreground'
                   }`}>
-                    {isCompleted ? '✓' : stepNum}
+                    {isCompleted ? 'âœ“' : stepNum}
                   </div>
                   <span className={`text-xs lg:text-sm font-medium transition-colors ${
                     isActive || isCompleted ? 'text-foreground' : 'text-muted-foreground'
@@ -385,7 +450,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                       Portable computers & notebooks
                     </p>
                     <div className="mt-3 lg:mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-xs font-semibold text-primary">Click to select →</span>
+                      <span className="text-xs font-semibold text-primary">Click to select â†’</span>
                     </div>
                   </div>
                 </button>
@@ -413,7 +478,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                       Desktop computers & workstations
                     </p>
                     <div className="mt-3 lg:mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-xs font-semibold text-primary">Click to select →</span>
+                      <span className="text-xs font-semibold text-primary">Click to select â†’</span>
                     </div>
                   </div>
                 </button>
@@ -496,7 +561,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                   What's the Problem?
                 </h2>
                 <p className="text-muted-foreground text-xs sm:text-base">
-                  Select all issues that apply • Multiple selections allowed
+                  Select all issues that apply â€¢ Multiple selections allowed
                 </p>
               </div>
 
@@ -736,7 +801,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                           rows={2}
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div ref={stateInputRef} className="relative">
                           <label className="text-sm font-medium mb-1 block">State</label>
                           <Input
@@ -900,7 +965,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                   <div>
                     <p className="text-xs lg:text-sm text-muted-foreground mb-1">Estimated Price Range</p>
                     <p className="text-xl lg:text-2xl font-display font-bold text-foreground">
-                      {deviceType === "laptop" ? "₹799 - ₹7,999" : "₹999 - ₹9,999"}
+                      {deviceType === "laptop" ? "â‚¹799 - â‚¹7,999" : "â‚¹999 - â‚¹9,999"}
                     </p>
                   </div>
                 </div>
@@ -950,7 +1015,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                 {/* Success Message */}
                 <div className="space-y-4 mb-8">
                   <h2 className="text-4xl font-display font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                    Booking Confirmed! 🎉
+                    Booking Confirmed! ðŸŽ‰
                   </h2>
                   <p className="text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed">
                     Excellent choice! Our expert technicians are ready to help.
@@ -963,12 +1028,12 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                   {bookingOtp ? (
                     <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-300 shadow-lg">
                       <div className="flex items-center justify-center gap-2 mb-3">
-                        <span className="text-3xl">🔐</span>
+                        <span className="text-3xl">ðŸ”</span>
                         <p className="font-bold text-blue-900 text-xl">Your Service OTP</p>
                       </div>
                       <p className="text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-blue-600 tracking-widest mb-3">{bookingOtp}</p>
                       <div className="p-3 bg-blue-100 rounded-lg">
-                        <p className="text-sm text-blue-900 font-semibold mb-1">⚠️ IMPORTANT: Save This OTP</p>
+                        <p className="text-sm text-blue-900 font-semibold mb-1">âš ï¸ IMPORTANT: Save This OTP</p>
                         <p className="text-xs text-blue-800">You'll need to share this OTP with the technician to verify service completion</p>
                       </div>
                     </div>
@@ -981,13 +1046,17 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                   <div className="p-6 bg-gradient-to-br from-card to-card/50 rounded-2xl border-2 border-primary/20 shadow-xl">
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-                        <span className="text-xl">📞</span>
+                        <span className="text-xl">ðŸ“ž</span>
                       </div>
                       <p className="text-sm font-semibold text-muted-foreground">We'll Contact You At</p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-2xl font-bold text-foreground">{formData.name}</p>
-                      <p className="text-lg font-semibold text-primary">{formData.phone}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-foreground text-center leading-tight break-all sm:break-words">
+                        {formData.name}
+                      </p>
+                      <p className="text-base sm:text-lg font-semibold text-primary text-center break-all sm:break-normal">
+                        {formData.phone}
+                      </p>
                     </div>
                     <div className="mt-4 pt-4 border-t border-border/50">
                       <div className="flex items-center justify-center gap-2 text-accent">
@@ -1061,7 +1130,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                 {/* Trust Badge */}
                 <div className="mt-8 flex items-center justify-center gap-2 text-muted-foreground">
                   <Shield className="w-5 h-5 text-primary" />
-                  <p className="text-sm font-medium">90-Day Warranty • Expert Technicians • Free Diagnosis</p>
+                  <p className="text-sm font-medium">90-Day Warranty â€¢ Expert Technicians â€¢ Free Diagnosis</p>
                 </div>
               </div>
             </div>
@@ -1074,3 +1143,4 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
 };
 
 export default BookingModal;
+

@@ -35,9 +35,9 @@ import {
   X
 } from "lucide-react";
 // React Icons imports for brand logos
-import { 
-  SiDell, SiHp, SiLenovo, SiAsus, SiAcer, SiApple, 
-  SiMsi, SiSamsung 
+import {
+  SiDell, SiHp, SiLenovo, SiAsus, SiAcer, SiApple,
+  SiMsi, SiSamsung
 } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,41 +83,41 @@ const Index = ({ currentUser }: IndexProps) => {
 
   return (
     <>
-    <div className="min-h-screen bg-white dark:bg-background overflow-hidden">
-      <Header onBookRepair={openBooking} />
-      <main className="page-enter">
-        <section id="home" ref={homeRef} className="opacity-0 transition-all duration-1000 transform">
-          <HeroSection onBookRepair={openBooking} />
-        </section>
-        <div ref={statsRef} className="opacity-0 transition-all duration-1000 transform">
-          <StatsSection />
-        </div>
-        <section id="services" ref={servicesRef} className="opacity-0 transition-all duration-1000 transform">
-          <ServicesSection />
-        </section>
-        <div ref={brandsRef} className="opacity-0 transition-all duration-1000 transform">
-          <BrandsSection />
-        </div>
-        <div ref={howItWorksRef} className="opacity-0 transition-all duration-1000 transform">
-          <HowItWorksSection />
-        </div>
-        <section id="membership" ref={membershipRef} className="opacity-0 transition-all duration-1000 transform">
-          <MembershipSection />
-        </section>
-        <div ref={testimonialsRef} className="opacity-0 transition-all duration-1000 transform">
-          <TestimonialsSection />
-        </div>
-        <section id="contact" ref={contactRef} className="opacity-0 transition-all duration-1000 transform">
-          <CTASection onBookRepair={openBooking} />
-        </section>
-      </main>
-      <Footer />
-    </div>
-    <BookingModal
-      isOpen={isBookingOpen}
-      onClose={() => setIsBookingOpen(false)}
-      currentUser={currentUser}
-    />
+      <div className="min-h-screen bg-white dark:bg-background overflow-hidden">
+        <Header onBookRepair={openBooking} />
+        <main className="page-enter">
+          <section id="home" ref={homeRef} className="opacity-0 transition-all duration-1000 transform">
+            <HeroSection onBookRepair={openBooking} />
+          </section>
+          <div ref={statsRef} className="opacity-0 transition-all duration-1000 transform">
+            <StatsSection />
+          </div>
+          <section id="services" ref={servicesRef} className="opacity-0 transition-all duration-1000 transform">
+            <ServicesSection />
+          </section>
+          <div ref={brandsRef} className="opacity-0 transition-all duration-1000 transform">
+            <BrandsSection />
+          </div>
+          <div ref={howItWorksRef} className="opacity-0 transition-all duration-1000 transform">
+            <HowItWorksSection />
+          </div>
+          <section id="membership" ref={membershipRef} className="opacity-0 transition-all duration-1000 transform">
+            <MembershipSection />
+          </section>
+          <div ref={testimonialsRef} className="opacity-0 transition-all duration-1000 transform">
+            <TestimonialsSection />
+          </div>
+          <section id="contact" ref={contactRef} className="opacity-0 transition-all duration-1000 transform">
+            <CTASection onBookRepair={openBooking} />
+          </section>
+        </main>
+        <Footer />
+      </div>
+      <BookingModal
+        isOpen={isBookingOpen}
+        onClose={() => setIsBookingOpen(false)}
+        currentUser={currentUser}
+      />
     </>
   );
 };
@@ -156,13 +156,6 @@ const HeroSection = ({ onBookRepair }: { onBookRepair?: () => void }) => {
               className="bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 text-white px-6 sm:px-8 py-3 text-base sm:text-lg font-semibold rounded-lg shadow-md transition-all duration-300 hover:scale-105 w-full sm:w-auto"
             >
               Book a Repair
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/membership')}
-              className="border-2 border-blue-500 dark:border-blue-400 text-blue-500 dark:text-blue-300 hover:bg-blue-500 dark:hover:bg-blue-400 hover:text-white px-6 sm:px-8 py-3 text-base sm:text-lg font-semibold rounded-lg transition-all duration-300 hover:scale-105 w-full sm:w-auto"
-            >
-              View Membership
             </Button>
           </div>
         </div>
@@ -232,9 +225,9 @@ const StatsSection = () => {
             >
               <div className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-primary-foreground mb-1 sm:mb-2">
                 {isVisible ? (
-                  <CountUp 
-                    end={stat.value} 
-                    suffix={stat.suffix} 
+                  <CountUp
+                    end={stat.value}
+                    suffix={stat.suffix}
                     isDecimal={stat.isDecimal}
                   />
                 ) : (
@@ -284,7 +277,7 @@ const CountUp = ({ end, suffix, isDecimal }: { end: number; suffix: string; isDe
 const ServicesSection = () => {
   const [selectedType, setSelectedType] = useState<"laptop" | "pc">("laptop");
   const navigate = useNavigate();
-  
+
   const laptopServices = [
     { icon: Monitor, title: "Screen Replacement", description: "Cracked or damaged screen? We replace with genuine LCD/LED panels.", price: "₹2,499", warranty: "90 Days" },
     { icon: Battery, title: "Battery Replacement", description: "Restore your laptop's battery life with original capacity batteries.", price: "₹1,999", warranty: "180 Days" },
@@ -317,7 +310,7 @@ const ServicesSection = () => {
             Expert Repair for Every Issue
           </h2>
           <p className="text-lg text-muted-foreground">
-            From simple fixes to complex repairs, our certified technicians handle it all 
+            From simple fixes to complex repairs, our certified technicians handle it all
             with precision and care.
           </p>
         </div>
@@ -325,11 +318,10 @@ const ServicesSection = () => {
           <div className="inline-flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-muted rounded-xl">
             <button
               onClick={() => setSelectedType("laptop")}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all ${
-                selectedType === "laptop"
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all ${selectedType === "laptop"
                   ? "gradient-hero text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               <Laptop className="w-4 h-4" />
               Laptop
@@ -337,11 +329,10 @@ const ServicesSection = () => {
             </button>
             <button
               onClick={() => setSelectedType("pc")}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all ${
-                selectedType === "pc"
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all ${selectedType === "pc"
                   ? "gradient-hero text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               <PcCase className="w-4 h-4" />
               Desktop
@@ -424,8 +415,8 @@ const BrandsSection = () => {
               key={brand.name}
               className="flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-xl hover:bg-muted/50 transition-all duration-300 cursor-default group"
             >
-              <brand.icon 
-                className={`text-4xl md:text-5xl ${brand.color} group-hover:scale-110 transition-transform duration-300`} 
+              <brand.icon
+                className={`text-4xl md:text-5xl ${brand.color} group-hover:scale-110 transition-transform duration-300`}
               />
               <span className="text-xs sm:text-sm md:text-base font-medium text-muted-foreground group-hover:text-primary transition-colors">
                 {brand.name}
@@ -459,7 +450,7 @@ const HowItWorksSection = () => {
             Repair in 4 Easy Steps
           </h2>
           <p className="text-lg text-muted-foreground">
-            Getting your laptop repaired has never been easier. Follow these simple steps 
+            Getting your laptop repaired has never been easier. Follow these simple steps
             and we'll handle the rest.
           </p>
         </div>
@@ -526,233 +517,229 @@ const MembershipSection = () => {
 
   return (
     <>
-    <section id="membership" className="py-12 sm:py-20 lg:py-28 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 border border-warning/20 mb-4 sm:mb-6">
-            <Crown className="w-4 h-4 text-warning" />
-            <span className="text-sm font-medium text-warning">Membership Plans</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
-            Save More with Membership
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Join our membership program for exclusive discounts, priority service, 
-            and extended warranty benefits.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative bg-card rounded-2xl p-5 sm:p-6 lg:p-8 border ${
-                plan.popular 
-                  ? "border-primary shadow-glow sm:scale-105" 
-                  : "border-border shadow-card"
-              } transition-all duration-300 hover:shadow-lg`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full gradient-hero text-primary-foreground text-sm font-semibold">
-                  Most Popular
-                </div>
-              )}
-              <div className={`w-14 h-14 rounded-xl ${plan.popular ? "gradient-hero" : "bg-primary/10"} flex items-center justify-center mb-5`}>
-                <plan.icon className={`w-7 h-7 ${plan.popular ? "text-primary-foreground" : "text-primary"}`} />
-              </div>
-              <h3 className="text-2xl font-display font-bold text-foreground mb-1">
-                {plan.name}
-              </h3>
-              <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-display font-bold text-foreground">{plan.price}</span>
-                <span className="text-muted-foreground">{plan.period}</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-accent" />
-                    </div>
-                    <span className="text-sm text-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button 
-                variant={plan.popular ? "hero" : "outline"} 
-                className="w-full"
-                size="lg"
-                onClick={() => handleSelectPlan(plan.id)}
-              >
-                Get Started
-              </Button>
+      <section id="membership" className="py-12 sm:py-20 lg:py-28 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 border border-warning/20 mb-4 sm:mb-6">
+              <Crown className="w-4 h-4 text-warning" />
+              <span className="text-sm font-medium text-warning">Membership Plans</span>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    {/* Payment Modal */}
-    {showPayment && selectedPlanDetails && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { setShowPayment(false); setSelectedPlan(null); }} />
-        <div className="relative bg-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300 border border-border">
-          <button
-            onClick={() => { setShowPayment(false); setSelectedPlan(null); }}
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-destructive hover:text-white transition-all z-10"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          {paymentSuccess ? (
-            <div className="p-8 text-center space-y-6">
-              <div className="w-20 h-20 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <Check className="w-10 h-10 text-green-600 dark:text-green-400" />
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
+              Save More with Membership
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Join our membership program for exclusive discounts, priority service,
+              and extended warranty benefits.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                className={`relative bg-card rounded-2xl p-5 sm:p-6 lg:p-8 border ${plan.popular
+                    ? "border-primary shadow-glow sm:scale-105"
+                    : "border-border shadow-card"
+                  } transition-all duration-300 hover:shadow-lg`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full gradient-hero text-primary-foreground text-sm font-semibold">
+                    Most Popular
+                  </div>
+                )}
+                <div className={`w-14 h-14 rounded-xl ${plan.popular ? "gradient-hero" : "bg-primary/10"} flex items-center justify-center mb-5`}>
+                  <plan.icon className={`w-7 h-7 ${plan.popular ? "text-primary-foreground" : "text-primary"}`} />
+                </div>
+                <h3 className="text-2xl font-display font-bold text-foreground mb-1">
+                  {plan.name}
+                </h3>
+                <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-display font-bold text-foreground">{plan.price}</span>
+                  <span className="text-muted-foreground">{plan.period}</span>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-accent" />
+                      </div>
+                      <span className="text-sm text-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant={plan.popular ? "hero" : "outline"}
+                  className="w-full"
+                  size="lg"
+                  onClick={() => handleSelectPlan(plan.id)}
+                >
+                  Get Started
+                </Button>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">Payment Successful!</h2>
-                <p className="text-muted-foreground">
-                  You're now a <span className="font-semibold text-primary">{selectedPlanDetails.name}</span> member.
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Payment Modal */}
+      {showPayment && selectedPlanDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { setShowPayment(false); setSelectedPlan(null); }} />
+          <div className="relative bg-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300 border border-border">
+            <button
+              onClick={() => { setShowPayment(false); setSelectedPlan(null); }}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-destructive hover:text-white transition-all z-10"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {paymentSuccess ? (
+              <div className="p-8 text-center space-y-6">
+                <div className="w-20 h-20 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <Check className="w-10 h-10 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Payment Successful!</h2>
+                  <p className="text-muted-foreground">
+                    You're now a <span className="font-semibold text-primary">{selectedPlanDetails.name}</span> member.
+                  </p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-xl space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Plan</span>
+                    <span className="font-semibold">{selectedPlanDetails.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Amount Paid</span>
+                    <span className="font-semibold">{selectedPlanDetails.price}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Valid Until</span>
+                    <span className="font-semibold">
+                      {new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full" onClick={() => { setShowPayment(false); setSelectedPlan(null); }}>
+                  Close
+                </Button>
+              </div>
+            ) : (
+              <div className="p-6 space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground">Complete Payment</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Subscribe to {selectedPlanDetails.name} plan</p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg ${selectedPlanDetails.popular ? "gradient-hero" : "bg-primary/10"} flex items-center justify-center`}>
+                      <selectedPlanDetails.icon className={`w-5 h-5 ${selectedPlanDetails.popular ? "text-primary-foreground" : "text-primary"}`} />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{selectedPlanDetails.name} Plan</p>
+                      <p className="text-xs text-muted-foreground">{selectedPlanDetails.description}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-foreground">{selectedPlanDetails.price}</p>
+                    <p className="text-xs text-muted-foreground">{selectedPlanDetails.period}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold text-foreground mb-3">Payment Method</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <button
+                      onClick={() => setPaymentMethod("upi")}
+                      className={`p-3 rounded-xl border-2 text-center transition-all ${paymentMethod === "upi" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                        }`}
+                    >
+                      <Smartphone className="w-5 h-5 mx-auto mb-1 text-primary" />
+                      <span className="text-xs font-medium">UPI</span>
+                    </button>
+                    <button
+                      onClick={() => setPaymentMethod("card")}
+                      className={`p-3 rounded-xl border-2 text-center transition-all ${paymentMethod === "card" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                        }`}
+                    >
+                      <CreditCard className="w-5 h-5 mx-auto mb-1 text-primary" />
+                      <span className="text-xs font-medium">Card</span>
+                    </button>
+                    <button
+                      onClick={() => setPaymentMethod("netbanking")}
+                      className={`p-3 rounded-xl border-2 text-center transition-all ${paymentMethod === "netbanking" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                        }`}
+                    >
+                      <Building2 className="w-5 h-5 mx-auto mb-1 text-primary" />
+                      <span className="text-xs font-medium">Net Banking</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {paymentMethod === "upi" && (
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1.5 block">UPI ID</label>
+                      <Input placeholder="yourname@upi" />
+                    </div>
+                  )}
+                  {paymentMethod === "card" && (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">Card Number</label>
+                        <Input placeholder="1234 5678 9012 3456" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-1.5 block">Expiry</label>
+                          <Input placeholder="MM/YY" />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-1.5 block">CVV</label>
+                          <Input placeholder="123" type="password" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1.5 block">Name on Card</label>
+                        <Input placeholder="Full name" />
+                      </div>
+                    </>
+                  )}
+                  {paymentMethod === "netbanking" && (
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1.5 block">Select Bank</label>
+                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="">Choose your bank</option>
+                        <option>State Bank of India</option>
+                        <option>HDFC Bank</option>
+                        <option>ICICI Bank</option>
+                        <option>Axis Bank</option>
+                        <option>Kotak Mahindra Bank</option>
+                        <option>Punjab National Bank</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  variant="hero"
+                  className="w-full"
+                  size="lg"
+                  onClick={handlePayment}
+                  disabled={paymentProcessing}
+                >
+                  {paymentProcessing ? "Processing..." : `Pay ${selectedPlanDetails.price}`}
+                </Button>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  🔒 Secured by 256-bit SSL encryption. Your payment info is safe.
                 </p>
               </div>
-              <div className="p-4 bg-muted/50 rounded-xl space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Plan</span>
-                  <span className="font-semibold">{selectedPlanDetails.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Amount Paid</span>
-                  <span className="font-semibold">{selectedPlanDetails.price}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Valid Until</span>
-                  <span className="font-semibold">
-                    {new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </span>
-                </div>
-              </div>
-              <Button variant="outline" className="w-full" onClick={() => { setShowPayment(false); setSelectedPlan(null); }}>
-                Close
-              </Button>
-            </div>
-          ) : (
-            <div className="p-6 space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">Complete Payment</h2>
-                <p className="text-sm text-muted-foreground mt-1">Subscribe to {selectedPlanDetails.name} plan</p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg ${selectedPlanDetails.popular ? "gradient-hero" : "bg-primary/10"} flex items-center justify-center`}>
-                    <selectedPlanDetails.icon className={`w-5 h-5 ${selectedPlanDetails.popular ? "text-primary-foreground" : "text-primary"}`} />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground">{selectedPlanDetails.name} Plan</p>
-                    <p className="text-xs text-muted-foreground">{selectedPlanDetails.description}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xl font-bold text-foreground">{selectedPlanDetails.price}</p>
-                  <p className="text-xs text-muted-foreground">{selectedPlanDetails.period}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-foreground mb-3">Payment Method</p>
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    onClick={() => setPaymentMethod("upi")}
-                    className={`p-3 rounded-xl border-2 text-center transition-all ${
-                      paymentMethod === "upi" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <Smartphone className="w-5 h-5 mx-auto mb-1 text-primary" />
-                    <span className="text-xs font-medium">UPI</span>
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod("card")}
-                    className={`p-3 rounded-xl border-2 text-center transition-all ${
-                      paymentMethod === "card" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <CreditCard className="w-5 h-5 mx-auto mb-1 text-primary" />
-                    <span className="text-xs font-medium">Card</span>
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod("netbanking")}
-                    className={`p-3 rounded-xl border-2 text-center transition-all ${
-                      paymentMethod === "netbanking" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <Building2 className="w-5 h-5 mx-auto mb-1 text-primary" />
-                    <span className="text-xs font-medium">Net Banking</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {paymentMethod === "upi" && (
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1.5 block">UPI ID</label>
-                    <Input placeholder="yourname@upi" />
-                  </div>
-                )}
-                {paymentMethod === "card" && (
-                  <>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-1.5 block">Card Number</label>
-                      <Input placeholder="1234 5678 9012 3456" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-sm font-medium text-foreground mb-1.5 block">Expiry</label>
-                        <Input placeholder="MM/YY" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-foreground mb-1.5 block">CVV</label>
-                        <Input placeholder="123" type="password" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-1.5 block">Name on Card</label>
-                      <Input placeholder="Full name" />
-                    </div>
-                  </>
-                )}
-                {paymentMethod === "netbanking" && (
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1.5 block">Select Bank</label>
-                    <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                      <option value="">Choose your bank</option>
-                      <option>State Bank of India</option>
-                      <option>HDFC Bank</option>
-                      <option>ICICI Bank</option>
-                      <option>Axis Bank</option>
-                      <option>Kotak Mahindra Bank</option>
-                      <option>Punjab National Bank</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              <Button
-                variant="hero"
-                className="w-full"
-                size="lg"
-                onClick={handlePayment}
-                disabled={paymentProcessing}
-              >
-                {paymentProcessing ? "Processing..." : `Pay ${selectedPlanDetails.price}`}
-              </Button>
-
-              <p className="text-xs text-center text-muted-foreground">
-                🔒 Secured by 256-bit SSL encryption. Your payment info is safe.
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 };
@@ -777,7 +764,7 @@ const TestimonialsSection = () => {
             What Our Customers Say
           </h2>
           <p className="text-lg text-muted-foreground">
-            Don't just take our word for it. Here's what our customers have to say 
+            Don't just take our word for it. Here's what our customers have to say
             about their experience.
           </p>
         </div>
@@ -816,57 +803,123 @@ const TestimonialsSection = () => {
 // CTA Section Component
 const CTASection = ({ onBookRepair }: { onBookRepair?: () => void }) => {
   const { toast } = useToast();
+  const [showContactModal, setShowContactModal] = useState(false);
+  const phoneNumber = "+91 12345 67890";
 
-  const handleCallUs = () => {
-    toast({
-      title: "📞 Call Us Now",
-      description: "Reach us at +91 12345 67890. Our support team is available Mon-Sat, 9 AM - 8 PM.",
-    });
+  const handleCall = () => {
+    window.open(`tel:${phoneNumber.replace(/[^\d]/g, "")}`);
+  };
+
+  const handleWhatsApp = () => {
+    window.open(`https://wa.me/${phoneNumber.replace(/[^\d]/g, "")}`);
+  };
+
+  const handleCopy = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(phoneNumber);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = phoneNumber;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      toast({
+        title: "Number copied",
+        description: `${phoneNumber} copied to clipboard.`,
+      });
+    } catch {
+      toast({
+        title: "Copy failed",
+        description: "Please copy the number manually.",
+      });
+    }
   };
 
   return (
-    <section id="contact" className="py-12 sm:py-20 lg:py-28 gradient-hero relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
-      </div>
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-primary-foreground mb-6">
-            Ready to Get Your Laptop Fixed?
-          </h2>
-          <p className="text-lg md:text-xl text-primary-foreground/80 mb-10">
-            Book a repair now and get your laptop working like new. 
-            Our experts are just a call away.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button variant="heroOutline" size="xl" onClick={handleCallUs}>
+    <>
+      <section id="contact" className="py-12 sm:py-20 lg:py-28 gradient-hero relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-primary-foreground mb-6">
+              Ready to Get Your Laptop Fixed?
+            </h2>
+            <p className="text-lg md:text-xl text-primary-foreground/80 mb-10">
+              Book a repair now and get your laptop working like new.
+              Our experts are just a call away.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button variant="heroOutline" size="xl" onClick={() => setShowContactModal(true)}>
                 <Phone className="w-5 h-5" />
                 Call Us Now
-            </Button>
-            <Button 
-              size="xl" 
-              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg"
-              onClick={onBookRepair}
-            >
-              Book Repair Online
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </div>
-          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-primary-foreground/70 text-sm sm:text-base">
-            <a href="tel:+911234567890" className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
-              <Phone className="w-4 h-4" />
-              +91 12345 67890
-            </a>
-            <span>•</span>
-            <a href="#" className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp Support
-            </a>
+              </Button>
+              <Button
+                size="xl"
+                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg"
+                onClick={onBookRepair}
+              >
+                Book Repair Online
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-primary-foreground/70 text-sm sm:text-base">
+              <button
+                type="button"
+                className="flex items-center gap-2 hover:text-primary-foreground transition-colors"
+                onClick={() => setShowContactModal(true)}
+              >
+                <Phone className="w-4 h-4" />
+                {phoneNumber}
+              </button>
+              <span>�</span>
+              <button
+                type="button"
+                className="flex items-center gap-2 hover:text-primary-foreground transition-colors"
+                onClick={() => setShowContactModal(true)}
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp Support
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {showContactModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+          <div className="relative bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 w-[90vw] max-w-xs flex flex-col items-center gap-4">
+            <button
+              onClick={() => setShowContactModal(false)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              aria-label="Close contact popup"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <Phone className="w-5 h-5 text-blue-500" />
+              <span className="font-semibold text-lg">Contact TECH-FIX</span>
+            </div>
+            <div className="text-center text-sm text-muted-foreground">{phoneNumber}</div>
+            <div className="flex gap-2 w-full">
+              <Button variant="hero" size="sm" className="flex-1" onClick={handleCall}>Call</Button>
+              <Button variant="outline" size="sm" className="flex-1" onClick={handleWhatsApp}>WhatsApp</Button>
+              <Button variant="ghost" size="sm" className="flex-1" onClick={handleCopy}>Copy</Button>
+            </div>
+            <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => setShowContactModal(false)}>Close</Button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

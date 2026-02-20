@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { 
   Monitor, 
   Battery, 
@@ -26,7 +26,6 @@ interface ServicesProps {
 }
 
 const Services = ({ currentUser }: ServicesProps) => {
-  const navigate = useNavigate();
   const location = useLocation();
   
   // Modal state
@@ -109,13 +108,6 @@ const Services = ({ currentUser }: ServicesProps) => {
                 className="bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 text-white px-6 sm:px-8 py-3 text-base sm:text-lg font-semibold rounded-lg shadow-md transition-all duration-300 hover:scale-105 w-full sm:w-auto"
               >
                 Book a Repair
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate('/membership')}
-                className="border-2 border-blue-500 dark:border-blue-400 text-blue-500 dark:text-blue-300 hover:bg-blue-500 dark:hover:bg-blue-400 hover:text-white px-6 sm:px-8 py-3 text-base sm:text-lg font-semibold rounded-lg transition-all duration-300 hover:scale-105 w-full sm:w-auto"
-              >
-                View Membership
               </Button>
             </div>
           </div>

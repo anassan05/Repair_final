@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef, useMemo } from "react";
 import { 
   User, 
   Mail, 
@@ -15,8 +15,8 @@ import {
   Plus,
   Trash2,
   Edit,
-  ShoppingBag,
-  Info
+  Info,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,6 +28,9 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useNavigate } from "react-router-dom";
 import { indianStatesAndDistricts, allStates } from "@/data/indianLocations";
+import { useToast } from "@/hooks/use-toast";
+
+const USER_BOOKINGS_KEY = "userBookings";
 
 // Mock user data
 const initialUserData = {
@@ -64,11 +67,74 @@ const initialUserData = {
   },
   stats: {
     totalRepairs: 8,
-    totalSpent: "₹24,850",
-    savedAmount: "₹4,970",
+    totalSpent: "â‚¹24,850",
+    savedAmount: "â‚¹4,970",
     avgRating: 4.8,
   },
 };
+
+const getInitialProfile = (currentUser: { name: string; phone: string }) => {
+  const stored = sessionStorage.getItem("userProfile");
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch (e) {}
+  }
+
+  let sessionUserEmail = initialUserData.email;
+  const sessionUserRaw = sessionStorage.getItem("user");
+  if (sessionUserRaw) {
+    try {
+      const sessionUser = JSON.parse(sessionUserRaw);
+      if (sessionUser?.email) {
+        sessionUserEmail = sessionUser.email;
+      }
+    } catch (e) {}
+  }
+
+  return {
+    ...initialUserData,
+    name: currentUser.name || initialUserData.name,
+    phone: currentUser.phone || initialUserData.phone,
+    email: sessionUserEmail,
+  };
+};
+
+const getStoredBookingsForUser = (phone: string) => {
+  const storedBookingsRaw = sessionStorage.getItem(USER_BOOKINGS_KEY);
+  if (!storedBookingsRaw) return [];
+
+  try {
+    const parsed = JSON.parse(storedBookingsRaw);
+    const allBookings = Array.isArray(parsed) ? parsed : [];
+    return allBookings.filter((booking: any) => {
+      if (!booking || typeof booking !== "object") return false;
+      if (booking.customerPhone) return booking.customerPhone === phone;
+      return true;
+    });
+  } catch {
+    return [];
+  }
+};
+
+const parseCurrencyValue = (value: unknown): number => {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value !== "string") return 0;
+
+  const normalized = value
+    .replace(/â‚¹|₹|INR/gi, "")
+    .replace(/[^\d.-]/g, "");
+
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const formatINR = (amount: number): string =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
 
 interface Address {
   id: number;
@@ -85,98 +151,12 @@ interface ProfileProps {
   onLogout: () => void;
 }
 
-const mockRepairHistory = [
-  {
-    id: "REP-2026-012",
-    device: "Laptop - Dell Inspiron 15",
-    issue: "Motherboard Repair",
-    date: "2026-02-10",
-    status: "Active",
-    cost: "₹6,499",
-    discount: "₹1,300",
-    rating: 0,
-  },
-  {
-    id: "REP-2026-009",
-    device: "Desktop PC - Custom Build",
-    issue: "Power Supply Replacement",
-    date: "2026-02-05",
-    status: "Active",
-    cost: "₹2,999",
-    discount: "₹600",
-    rating: 0,
-  },
-  {
-    id: "REP-2026-007",
-    device: "Laptop - ASUS ROG Strix",
-    issue: "Overheating Fix & Thermal Paste",
-    date: "2026-01-28",
-    status: "Active",
-    cost: "₹1,499",
-    discount: "₹300",
-    rating: 0,
-  },
-  {
-    id: "REP-2026-001",
-    device: "Laptop - Dell Inspiron",
-    issue: "Screen Replacement",
-    date: "2026-01-05",
-    status: "Completed",
-    cost: "₹3,499",
-    discount: "₹700",
-    rating: 5,
-  },
-  {
-    id: "REP-2025-087",
-    device: "Desktop PC - HP Omen",
-    issue: "Graphics Card Upgrade",
-    date: "2025-12-20",
-    status: "Completed",
-    cost: "₹5,999",
-    discount: "₹1,200",
-    rating: 5,
-  },
-  {
-    id: "REP-2025-072",
-    device: "Laptop - Lenovo ThinkPad",
-    issue: "SSD Upgrade & Data Migration",
-    date: "2025-12-01",
-    status: "Completed",
-    cost: "₹4,299",
-    discount: "₹860",
-    rating: 4,
-  },
-  {
-    id: "REP-2025-065",
-    device: "Laptop - HP Pavilion",
-    issue: "Battery Replacement",
-    date: "2025-11-15",
-    status: "Completed",
-    cost: "₹2,799",
-    discount: "₹560",
-    rating: 4,
-  },
-  {
-    id: "REP-2025-051",
-    device: "Desktop PC - Custom Build",
-    issue: "RAM Upgrade (16GB to 32GB)",
-    date: "2025-10-22",
-    status: "Completed",
-    cost: "₹3,199",
-    discount: "₹640",
-    rating: 5,
-  },
-];
-
 const Profile = ({ currentUser, onLogout }: ProfileProps) => {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState({
-    ...initialUserData,
-    name: currentUser.name,
-    phone: currentUser.phone,
-  });
-  const [isEditing, setIsEditing] = useState(false);
+  const { toast } = useToast();
+  const [userData, setUserData] = useState(() => getInitialProfile(currentUser));
   const [editedData, setEditedData] = useState(userData);
+  const [isEditing, setIsEditing] = useState(false);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
   const [selectedRepair, setSelectedRepair] = useState<any>(null);
@@ -191,53 +171,69 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
     isDefault: false,
   });
   const [bookings, setBookings] = useState<any[]>([]);
-  const [repairFilter, setRepairFilter] = useState<"all" | "active" | "completed">("all");
+  const [repairFilter, setRepairFilter] = useState<"all" | "active" | "completed">("active");
   const [showStateSuggestions, setShowStateSuggestions] = useState(false);
   const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
   const stateInputRef = useRef<HTMLDivElement>(null);
   const districtInputRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to top when component mounts
+  // Save profile to sessionStorage whenever userData changes
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    sessionStorage.setItem('userProfile', JSON.stringify(userData));
+  }, [userData]);
 
-  // Load addresses from localStorage and merge with initial data
+  // Load addresses from sessionStorage (not merged with dummy)
   useEffect(() => {
-    const savedAddressesFromStorage = localStorage.getItem('userAddresses');
+    const savedAddressesFromStorage = sessionStorage.getItem('userAddresses');
     if (savedAddressesFromStorage) {
       try {
         const savedAddresses = JSON.parse(savedAddressesFromStorage);
-        // Merge saved addresses with existing ones, avoiding duplicates
-        const mergedAddresses = [...initialUserData.addresses];
-        
-        savedAddresses.forEach((savedAddr: Address) => {
-          // Check if address already exists (by comparing full address)
-          const exists = mergedAddresses.some(existing => 
-            existing.address === savedAddr.address && 
-            existing.city === savedAddr.city && 
-            existing.pincode === savedAddr.pincode
-          );
-          
-          if (!exists) {
-            mergedAddresses.push(savedAddr);
-          }
-        });
-        
-        setUserData({
-          ...userData,
-          addresses: mergedAddresses,
-        });
-      } catch (e) {
-        console.error('Error loading saved addresses:', e);
-      }
+        setUserData(prev => ({ ...prev, addresses: savedAddresses }));
+      } catch (e) {}
     }
   }, []);
 
-  // Load dummy repair history
+  // Load persisted booking history for this user
   useEffect(() => {
-    setBookings(mockRepairHistory);
-  }, []);
+    const refreshBookings = () => {
+      setBookings(getStoredBookingsForUser(currentUser.phone));
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (!event.key || event.key === USER_BOOKINGS_KEY) {
+        refreshBookings();
+      }
+    };
+
+    refreshBookings();
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", refreshBookings);
+    window.addEventListener("bookings-updated", refreshBookings);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", refreshBookings);
+      window.removeEventListener("bookings-updated", refreshBookings);
+    };
+  }, [currentUser.phone]);
+
+  const liveStats = useMemo(() => {
+    const totalRepairs = bookings.length;
+    const totalSpentValue = bookings.reduce(
+      (total, booking) => total + parseCurrencyValue(booking?.cost),
+      0
+    );
+    const totalSavedValue = bookings.reduce(
+      (total, booking) => total + parseCurrencyValue(booking?.discount),
+      0
+    );
+
+    return {
+      totalRepairs,
+      totalSpent: formatINR(totalSpentValue),
+      savedAmount: formatINR(totalSavedValue),
+    };
+  }, [bookings]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -247,7 +243,10 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
   const handleSave = () => {
     setUserData(editedData);
     setIsEditing(false);
-    alert("Profile updated successfully!");
+    toast({
+      title: "Profile updated",
+      description: "Your profile changes were saved successfully.",
+    });
   };
 
   const handleCancel = () => {
@@ -255,61 +254,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
     setEditedData(userData);
   };
 
-  const handleAddAddress = () => {
-    const id = Math.max(...userData.addresses.map(a => a.id), 0) + 1;
-    const addressToAdd = { ...newAddress, id };
-    setUserData({
-      ...userData,
-      addresses: [...userData.addresses, addressToAdd],
-    });
-    setNewAddress({
-      id: 0,
-      type: "Home",
-      address: "",
-      city: "",
-      state: "",
-      pincode: "",
-      isDefault: false,
-    });
-    setIsAddingAddress(false);
-    alert("Address added successfully!");
-  };
-
-  const handleDeleteAddress = (id: number) => {
-    if (userData.addresses.length === 1) {
-      alert("You must have at least one address!");
-      return;
-    }
-    setUserData({
-      ...userData,
-      addresses: userData.addresses.filter(a => a.id !== id),
-    });
-    alert("Address deleted successfully!");
-  };
-
-  const handleSetDefault = (id: number) => {
-    setUserData({
-      ...userData,
-      addresses: userData.addresses.map(a => ({
-        ...a,
-        isDefault: a.id === id,
-      })),
-    });
-  };
-
-  const handleEditAddress = (address: Address) => {
-    setEditingAddressId(address.id);
-    setNewAddress(address);
-    setIsAddingAddress(true);
-  };
-
-  const handleUpdateAddress = () => {
-    setUserData({
-      ...userData,
-      addresses: userData.addresses.map(a =>
-        a.id === editingAddressId ? newAddress : a
-      ),
-    });
+  const resetAddressForm = () => {
     setNewAddress({
       id: 0,
       type: "Home",
@@ -321,7 +266,75 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
     });
     setIsAddingAddress(false);
     setEditingAddressId(null);
-    alert("Address updated successfully!");
+  };
+
+  const handleAddAddress = () => {
+    const addressToAdd = {
+      ...newAddress,
+      id: Math.max(...userData.addresses.map(a => a.id), 0) + 1,
+      isDefault: userData.addresses.length === 0,
+    };
+
+    setUserData(prev => {
+      const updated = { ...prev, addresses: [...prev.addresses, addressToAdd] };
+      sessionStorage.setItem('userAddresses', JSON.stringify(updated.addresses));
+      return updated;
+    });
+    resetAddressForm();
+    toast({
+      title: "Address saved",
+      description: "New address added successfully.",
+    });
+  };
+
+  const handleDeleteAddress = (id: number) => {
+    setUserData(prev => {
+      const updated = { ...prev, addresses: prev.addresses.filter(a => a.id !== id) };
+      sessionStorage.setItem('userAddresses', JSON.stringify(updated.addresses));
+      return updated;
+    });
+    toast({
+      title: "Address removed",
+      description: "Address deleted successfully.",
+    });
+  };
+
+  const handleSetDefault = (id: number) => {
+    setUserData(prev => {
+      const updated = {
+        ...prev,
+        addresses: prev.addresses.map(a => ({
+          ...a,
+          isDefault: a.id === id,
+        }))
+      };
+      sessionStorage.setItem('userAddresses', JSON.stringify(updated.addresses));
+      return updated;
+    });
+  };
+
+  const handleEditAddress = (address: Address) => {
+    setEditingAddressId(address.id);
+    setNewAddress(address);
+    setIsAddingAddress(true);
+  };
+
+  const handleUpdateAddress = () => {
+    if (!editingAddressId) return;
+
+    setUserData(prev => {
+      const updated = {
+        ...prev,
+        addresses: prev.addresses.map(a => (a.id === editingAddressId ? newAddress : a)),
+      };
+      sessionStorage.setItem('userAddresses', JSON.stringify(updated.addresses));
+      return updated;
+    });
+    resetAddressForm();
+    toast({
+      title: "Address updated",
+      description: "Address changes were saved successfully.",
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -347,8 +360,8 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Profile Header */}
           <Card className="p-4 sm:p-6 mb-4 sm:mb-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-              <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6 mb-4">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                 <div className="relative flex-shrink-0">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl gradient-hero flex items-center justify-center">
                     <User className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" />
@@ -357,8 +370,8 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                     <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-foreground" />
                   </div>
                 </div>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-1">
+                <div className="min-w-0">
+                  <h1 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-1 leading-tight break-words">
                     {userData.name}
                   </h1>
                   <Badge className="gradient-hero border-0 text-primary-foreground text-xs sm:text-sm">
@@ -366,15 +379,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                   </Badge>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button 
-                  onClick={() => navigate('/services')} 
-                  className="gradient-hero"
-                  size="lg"
-                >
-                  <ShoppingBag className="w-4 h-4 mr-2" />
-                  Book Service Now
-                </Button>
+              <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-end sm:self-start">
               {!isEditing ? (
                 <Button onClick={handleEdit} className="w-full sm:w-auto">Edit Profile</Button>
               ) : (
@@ -389,18 +394,22 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                   </Button>
                 </div>
               )}
+                <Button onClick={onLogout} variant="outline" className="w-full sm:w-auto">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
               </div>
             </div>
 
             {!isEditing ? (
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground min-w-0">
                   <Mail className="w-4 h-4" />
-                  {userData.email}
+                  <span className="truncate">{userData.email}</span>
                 </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2 text-muted-foreground sm:justify-end min-w-0">
                   <Phone className="w-4 h-4" />
-                  {userData.phone}
+                  <span className="truncate">{userData.phone}</span>
                 </div>
               </div>
             ) : (
@@ -441,7 +450,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                   <Wrench className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm sm:text-xl font-bold">{userData.stats.totalRepairs}</p>
+                  <p className="text-sm sm:text-xl font-bold">{liveStats.totalRepairs}</p>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">Repairs</p>
                 </div>
               </div>
@@ -452,7 +461,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                   <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
                 </div>
                 <div>
-                  <p className="text-sm sm:text-xl font-bold">{userData.stats.totalSpent}</p>
+                  <p className="text-sm sm:text-xl font-bold">{liveStats.totalSpent}</p>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">Spent</p>
                 </div>
               </div>
@@ -463,7 +472,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                   <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
                 </div>
                 <div>
-                  <p className="text-sm sm:text-xl font-bold">{userData.stats.savedAmount}</p>
+                  <p className="text-sm sm:text-xl font-bold">{liveStats.savedAmount}</p>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">Saved</p>
                 </div>
               </div>
@@ -557,7 +566,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                       rows={2}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div ref={stateInputRef} className="relative">
                       <label className="text-sm font-medium mb-1 block">State</label>
                       <Input
@@ -800,7 +809,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                     </div>
                     <div className="text-left sm:text-right">
                       <p className="text-base sm:text-lg font-bold">{repair.cost}</p>
-                      {repair.discount && repair.discount !== "₹0" && (
+                      {repair.discount && repair.discount !== "â‚¹0" && (
                         <p className="text-xs text-accent">Saved {repair.discount}</p>
                       )}
                     </div>
@@ -818,7 +827,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-3 h-3 ${
+                            className={`w-5 h-5 ${
                               i < repair.rating
                                 ? "fill-warning text-warning"
                                 : "text-muted"
@@ -861,12 +870,12 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
               {selectedRepair.otp && (
                 <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-300 shadow-lg">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-3xl">🔐</span>
+                    <span className="text-3xl">ðŸ”</span>
                     <p className="font-bold text-blue-900 text-xl">Your Service OTP</p>
                   </div>
                   <p className="text-4xl sm:text-5xl font-mono font-bold text-blue-600 tracking-wider mb-3">{selectedRepair.otp}</p>
                   <div className="p-3 bg-blue-100 rounded-lg">
-                    <p className="text-sm text-blue-900 font-semibold mb-1">⚠️ IMPORTANT: Save This OTP</p>
+                    <p className="text-sm text-blue-900 font-semibold mb-1">âš ï¸ IMPORTANT: Save This OTP</p>
                     <p className="text-xs text-blue-800">Share this with the worker to verify service completion</p>
                   </div>
                 </div>
@@ -903,7 +912,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                   <p className="text-sm font-semibold text-muted-foreground">Cost</p>
                   <p className="text-lg font-bold">{selectedRepair.cost}</p>
                 </div>
-                {selectedRepair.discount && selectedRepair.discount !== "₹0" && (
+                {selectedRepair.discount && selectedRepair.discount !== "â‚¹0" && (
                   <div>
                     <p className="text-sm font-semibold text-muted-foreground">Discount Applied</p>
                     <p className="text-lg font-bold text-accent">{selectedRepair.discount}</p>
@@ -933,9 +942,9 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => navigate('/services')}
+                  onClick={() => setDetailsOpen(false)}
                 >
-                  Book Another Service
+                  Close
                 </Button>
               </div>
             </div>
@@ -949,3 +958,6 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
 };
 
 export default Profile;
+
+
+

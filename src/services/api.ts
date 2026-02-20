@@ -1,24 +1,46 @@
-// Mock API - using localStorage for data persistence
+﻿// Mock API - using sessionStorage for data persistence
 const MOCK_USERS = 'mock_users';
 const MOCK_BOOKINGS = 'mock_bookings';
 
-// Helper to get mock data from localStorage
-const getStoredData = (key: string) => {
-  const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : null;
+type MockUser = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+};
+
+type MockBooking = {
+  id: string;
+  customerId: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress: string;
+  service: string;
+  date: string;
+  time: string;
+  status: string;
+  createdAt: string;
+  rating: number | null;
+};
+
+// Helper to get mock data from sessionStorage
+const getStoredData = <T>(key: string): T | null => {
+  const data = sessionStorage.getItem(key);
+  return data ? (JSON.parse(data) as T) : null;
 };
 
 // Helper to save mock data
-const saveStoredData = (key: string, data: any) => {
-  localStorage.setItem(key, JSON.stringify(data));
+const saveStoredData = <T>(key: string, data: T) => {
+  sessionStorage.setItem(key, JSON.stringify(data));
 };
 
 export const userAPI = {
-  // Login - mock with localStorage
+  // Login - mock with sessionStorage
   login: async (email: string, password: string) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const users = getStoredData(MOCK_USERS) || {};
+        const users = getStoredData<Record<string, MockUser>>(MOCK_USERS) || {};
         const user = users[email];
 
         if (user && user.password === password) {
@@ -37,11 +59,11 @@ export const userAPI = {
     });
   },
 
-  // Register - mock with localStorage
+  // Register - mock with sessionStorage
   register: async (userData: { name: string; email: string; phone: string; password: string }) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const users = getStoredData(MOCK_USERS) || {};
+        const users = getStoredData<Record<string, MockUser>>(MOCK_USERS) || {};
 
         if (users[userData.email]) {
           resolve({
@@ -78,7 +100,7 @@ export const userAPI = {
   }) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const bookings = getStoredData(MOCK_BOOKINGS) || [];
+        const bookings = getStoredData<MockBooking[]>(MOCK_BOOKINGS) || [];
         const newBooking = {
           id: `booking-${Date.now()}`,
           ...bookingData,
@@ -101,8 +123,8 @@ export const userAPI = {
   getBookings: async (customerId: string) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const bookings = getStoredData(MOCK_BOOKINGS) || [];
-        const userBookings = bookings.filter((b: any) => b.customerId === customerId);
+        const bookings = getStoredData<MockBooking[]>(MOCK_BOOKINGS) || [];
+        const userBookings = bookings.filter((b) => b.customerId === customerId);
 
         resolve({
           success: true,
@@ -116,8 +138,8 @@ export const userAPI = {
   getBookingDetails: async (bookingId: string) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const bookings = getStoredData(MOCK_BOOKINGS) || [];
-        const booking = bookings.find((b: any) => b.id === bookingId);
+        const bookings = getStoredData<MockBooking[]>(MOCK_BOOKINGS) || [];
+        const booking = bookings.find((b) => b.id === bookingId);
 
         resolve(booking || {
           success: false,
@@ -131,8 +153,8 @@ export const userAPI = {
   rateBooking: async (bookingId: string, rating: number) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const bookings = getStoredData(MOCK_BOOKINGS) || [];
-        const booking = bookings.find((b: any) => b.id === bookingId);
+        const bookings = getStoredData<MockBooking[]>(MOCK_BOOKINGS) || [];
+        const booking = bookings.find((b) => b.id === bookingId);
 
         if (booking) {
           booking.rating = rating;
@@ -151,3 +173,4 @@ export const userAPI = {
     });
   },
 };
+
