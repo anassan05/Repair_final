@@ -167,10 +167,7 @@ const HeroSection = ({ onBookRepair }: { onBookRepair?: () => void }) => {
     <section id="home" className="relative min-h-[68vh] lg:min-h-[78vh] flex items-center pt-16 sm:pt-20 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8 animate-fade-in">
       <div className="max-w-7xl mx-auto w-full">
         <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 mb-6 sm:mb-8 animate-bounce-in">
-            <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500 dark:text-blue-300" />
-            <span className="text-blue-600 dark:text-blue-200 text-xs sm:text-sm font-medium">Certified Apple & PC Specialists</span>
-          </div>
+
           <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
             <h1
               ref={headingRef}
@@ -266,7 +263,7 @@ const StatsSection = () => {
               className="text-center animate-fade-up"
               style={{ animationDelay: `${index * 0.1}s`, opacity: isVisible ? 1 : 0 }}
             >
-              <div className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-foreground mb-1 sm:mb-2">
+              <div className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-blue-500 dark:text-blue-400 mb-1 sm:mb-2">
                 {isVisible ? (
                   <CountUp
                     end={stat.value}

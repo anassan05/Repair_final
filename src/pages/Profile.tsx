@@ -399,65 +399,97 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Profile Header */}
           <Card className="p-4 sm:p-6 mb-4 sm:mb-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6 mb-4">
-              <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                <div className="relative flex-shrink-0">
-                  <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-xl gradient-hero flex items-center justify-center">
-                    <User className="w-6 h-6 sm:w-10 sm:h-10 text-primary-foreground" />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-8 sm:h-8 rounded-full gradient-hero flex items-center justify-center border-2 border-card">
-                    <Crown className="w-2.5 h-2.5 sm:w-4 sm:h-4 text-primary-foreground" />
-                  </div>
+            {/* Row 1: avatar + name + edit icon */}
+            <div className="flex items-center gap-3 sm:gap-4 mb-3">
+              <div className="relative flex-shrink-0">
+                <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-xl gradient-hero flex items-center justify-center">
+                  <User className="w-5 h-5 sm:w-8 sm:h-8 text-primary-foreground" />
                 </div>
-                <div className="min-w-0">
-                  <h1 className="text-base sm:text-2xl font-display font-bold text-foreground mb-1 leading-tight truncate">
-                    {userData.name}
-                  </h1>
-                  <Badge className="gradient-hero border-0 text-primary-foreground text-xs sm:text-sm">
-                    {userData.membership.plan} Member
-                  </Badge>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-7 sm:h-7 rounded-full gradient-hero flex items-center justify-center border-2 border-card">
+                  <Crown className="w-2 h-2 sm:w-3.5 sm:h-3.5 text-primary-foreground" />
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2 sm:flex-row sm:justify-end sm:self-start">
-              {!isEditing ? (
-                <Button onClick={handleEdit} className="flex-1 sm:flex-initial">Edit Profile</Button>
-              ) : (
-                <>
-                  <Button onClick={handleSave} variant="hero" className="flex-1 sm:flex-initial">
-                    <Save className="w-4 h-4" />
-                    <span className="hidden sm:inline">Save</span>
-                  </Button>
-                  <Button onClick={handleCancel} variant="outline" className="flex-1 sm:flex-initial">
-                    <X className="w-4 h-4" />
-                    <span className="hidden sm:inline">Cancel</span>
-                  </Button>
-                </>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleTheme}
-                className="w-10 h-10 p-0 flex items-center justify-center"
-                aria-label="Toggle theme"
-                title="Toggle theme"
-              >
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </Button>
-                <Button onClick={onLogout} variant="outline" className="flex-1 sm:flex-initial">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Button>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-sm sm:text-xl font-display font-bold text-foreground leading-tight truncate">
+                  {userData.name}
+                </h1>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {!isEditing ? (
+                  <button
+                    onClick={handleEdit}
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                    aria-label="Edit profile"
+                    title="Edit profile"
+                  >
+                    <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleSave}
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-green-500 hover:bg-green-500/10 transition-colors"
+                      aria-label="Save"
+                    >
+                      <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                      aria-label="Cancel"
+                    >
+                      <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </button>
+                  </>
+                )}
+                {/* Desktop: Theme + Logout inline with edit */}
+                <div className="hidden sm:flex items-center gap-1 ml-1">
+                  <button
+                    onClick={toggleTheme}
+                    className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                    aria-label="Toggle theme"
+                  >
+                    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </button>
+                  <button
+                    onClick={onLogout}
+                    className="flex items-center gap-2 px-3 h-9 rounded-lg border border-border text-sm text-muted-foreground hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout</span>
+                  </button>
+                </div>
               </div>
             </div>
 
+            {/* Mobile only: Theme toggle + Logout — full width below */}
+            <div className="flex sm:hidden items-center gap-2 mb-3">
+              <button
+                onClick={toggleTheme}
+                className="flex-1 h-9 rounded-lg border border-border flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+              <button
+                onClick={onLogout}
+                className="flex-1 h-9 rounded-lg border border-border flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+            </div>
+
+            {/* Email + Phone */}
             {!isEditing ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 text-sm">
+              <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 sm:gap-4 text-xs sm:text-sm">
                 <div className="flex items-center gap-2 text-muted-foreground min-w-0">
-                  <Mail className="w-4 h-4" />
+                  <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span className="truncate">{userData.email}</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground sm:justify-end min-w-0">
-                  <Phone className="w-4 h-4" />
+                  <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span className="truncate">{userData.phone}</span>
                 </div>
               </div>
