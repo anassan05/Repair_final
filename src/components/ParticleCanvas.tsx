@@ -20,11 +20,12 @@ const ParticleCanvas = ({ excludeSelector }: ParticleCanvasProps) => {
   const particlesRef = useRef<Particle[]>([]);
   const animFrameRef = useRef<number>(0);
 
-  const PARTICLE_COUNT = 60;       // reduced from 120 for performance
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const PARTICLE_COUNT = isMobile ? 40 : 60;
   const INTERACTION_RADIUS = 150;
   const RETURN_SPEED = 0.02;
   const DOT_COLOR = "100, 140, 220"; // visible blue dots
-  const CONNECTION_DIST = 120;       // max distance for line connections
+  const CONNECTION_DIST = isMobile ? 80 : 120;
 
   const initParticles = useCallback((width: number, height: number) => {
     const particles: Particle[] = [];
@@ -128,14 +129,13 @@ const ParticleCanvas = ({ excludeSelector }: ParticleCanvasProps) => {
         const glowBoost = dist < INTERACTION_RADIUS ? (1 - dist / INTERACTION_RADIUS) * 0.4 : 0;
 
         // Mobile & dark-mode aware opacity
-        const mobileScale = window.innerWidth < 768 ? 0.15 : 1;
         const isDark = document.documentElement.classList.contains('dark');
-        const themeScale = isDark ? 0.35 : 1;
+        const themeScale = isDark ? 0.6 : 1;
 
         if (!particleExcluded) {
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${DOT_COLOR}, ${(p.opacity + glowBoost) * mobileScale * themeScale})`;
+          ctx.fillStyle = `rgba(${DOT_COLOR}, ${(p.opacity + glowBoost) * themeScale})`;
           ctx.fill();
         }
 
@@ -150,7 +150,7 @@ const ParticleCanvas = ({ excludeSelector }: ParticleCanvasProps) => {
             const ldSq = lx * lx + ly * ly;
             if (ldSq < CONNECTION_DIST * CONNECTION_DIST) {
               const ld = Math.sqrt(ldSq);
-              const lineOpacity = 0.12 * (1 - ld / CONNECTION_DIST) * mobileScale * themeScale;
+              const lineOpacity = 0.12 * (1 - ld / CONNECTION_DIST) * themeScale;
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
               ctx.lineTo(p2.x, p2.y);

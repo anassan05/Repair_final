@@ -32,7 +32,6 @@ const ConditionalParticles = () => {
   }, []);
 
   if (pathname === "/profile" || pathname === "/services") return null;
-  if (isMobile) return <FloatingBubbles />;
   return (
     <>
       <FloatingBubbles />
