@@ -55,6 +55,15 @@ const Header = ({ onBookRepair }: HeaderProps) => {
   }, [navLinks, isHomePage]);
 
   const handleNavClick = (href: string) => {
+    // Special-case Services hash: if already on services page, smooth-scroll locally
+    if (href === '#services' && location.pathname === '/services') {
+      const servicesSection = document.querySelector('#services');
+      if (servicesSection) {
+        servicesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
+
     if (href.startsWith('#')) {
       setActiveSection(href);
       // If we're not on the home page, navigate to it with hash first
@@ -156,7 +165,7 @@ const Header = ({ onBookRepair }: HeaderProps) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#10151b] border-b border-gray-200 dark:border-gray-800 shadow-lg animate-slide-down">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-[#10151b]/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-800 shadow-lg animate-slide-down">
       <div className="container mx-auto px-3 lg:px-4">
         <div className="flex items-center justify-between h-14 lg:h-20">
           {/* Mobile Menu Toggle - Left side */}
@@ -178,13 +187,10 @@ const Header = ({ onBookRepair }: HeaderProps) => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link, index) => (
-              <a
+              <button
                 key={link.label}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick(link.href);
-                }}
+                type="button"
+                onClick={() => handleNavClick(link.href)}
                 className={`text-sm font-medium transition-all duration-300 cursor-pointer relative group transform hover:scale-110 ${
                   isHomePage && activeSection === link.href 
                     ? 'text-blue-500 dark:text-blue-400 font-semibold' 
@@ -199,7 +205,7 @@ const Header = ({ onBookRepair }: HeaderProps) => {
                     : 'w-0 bg-blue-500 dark:bg-blue-400 group-hover:w-full group-hover:shadow-md group-hover:shadow-blue-200/30 dark:group-hover:shadow-blue-900/30'
                 }`}></span>
                 <span className="absolute inset-0 -z-10 bg-cyan-400/5 dark:bg-cyan-900/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300"></span>
-              </a>
+              </button>
             ))}
           </nav>
 
@@ -210,7 +216,7 @@ const Header = ({ onBookRepair }: HeaderProps) => {
               className="flex items-center gap-2 text-xs lg:text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-cyan-400 dark:hover:text-cyan-300 transition-all duration-300 hover:scale-105 group cursor-pointer"
             >
               <Phone className="w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-              <span className="hidden lg:inline"> TECH-FIX</span>
+              <span className="hidden lg:inline"> CareMylap</span>
             </button>
             <Button variant="outline" size="sm" onClick={() => navigate('/profile')} className="hidden lg:flex p-2 lg:p-3 border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-800 hover:text-white dark:hover:bg-slate-700 dark:hover:text-white">
               <User className="w-4 h-4 lg:w-5 lg:h-5" />
@@ -229,18 +235,17 @@ const Header = ({ onBookRepair }: HeaderProps) => {
           <div className="lg:hidden py-3 border-t border-gray-200 dark:border-gray-700 animate-fade-in bg-white/95 dark:bg-[#10151b]/95 backdrop-blur-md">
             <nav className="flex flex-col gap-1 px-1">
               {navLinks.map((link) => (
-                <a
+                <button
                   key={link.label}
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault();
+                  type="button"
+                  onClick={() => {
                     handleNavClick(link.href);
                     setIsMenuOpen(false);
                   }}
-                  className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-500 dark:hover:text-cyan-300 rounded-lg transition-colors cursor-pointer active:bg-blue-100 dark:active:bg-slate-600"
+                  className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-500 dark:hover:text-cyan-300 rounded-lg transition-colors cursor-pointer active:bg-blue-100 dark:active:bg-slate-600 text-left"
                 >
                   {link.label}
-                </a>
+                </button>
               ))}
               <div className="pt-3 mt-1 px-3 flex flex-col gap-2.5 border-t border-gray-200 dark:border-gray-700">
                 <button onClick={() => { setIsMenuOpen(false); toast({ title: "\ud83d\udcde Call Us Now", description: "Reach us at +91 12345 67890. Our support team is available Mon-Sat, 9 AM - 8 PM." }); }} className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-slate-200 py-2.5 cursor-pointer active:text-blue-500">

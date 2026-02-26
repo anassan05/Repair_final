@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef } from "react";
-import { X, Monitor, Battery, Keyboard, HardDrive, Cpu, Wifi, Upload, ArrowRight, ArrowLeft, Shield, Check, Laptop, PcCase, MapPin, Plus } from "lucide-react";
+import { X, Monitor, Battery, Keyboard, HardDrive, Cpu, Wifi, Upload, ArrowRight, ArrowLeft, Shield, Check, Laptop, PcCase, MapPin, Plus, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,23 +63,23 @@ const laptopBrands = ["Dell", "HP", "Lenovo", "ASUS", "Acer", "Apple", "MSI", "S
 const pcBrands = ["Dell", "HP", "Lenovo", "ASUS", "Acer", "Intel", "AMD", "Custom Build", "Other"];
 
 const laptopRepairIssues = [
-  { icon: Monitor, label: "Screen Issue", description: "Cracked, black, or flickering display", price: "â‚¹2,499 - â‚¹5,999" },
-  { icon: Battery, label: "Battery Problem", description: "Not charging or drains quickly", price: "â‚¹1,999 - â‚¹3,999" },
-  { icon: Keyboard, label: "Keyboard Fix", description: "Keys not working or stuck", price: "â‚¹999 - â‚¹2,499" },
-  { icon: HardDrive, label: "Storage/HDD", description: "Slow performance or data recovery", price: "â‚¹1,499 - â‚¹4,999" },
-  { icon: Cpu, label: "Motherboard", description: "Not powering on or random shutdowns", price: "â‚¹2,999 - â‚¹7,999" },
-  { icon: Wifi, label: "WiFi/Network", description: "Can't connect to internet", price: "â‚¹799 - â‚¹1,999" },
-  { icon: Shield, label: "Not Sure / Need Diagnosis", description: "Let our technician identify the issue", price: "Free Checkup" },
+  { icon: Monitor, label: "Screen Issue", description: "Cracked, black, or flickering display", price: "₹2,499 - ₹5,999", image: "https://images.unsplash.com/photo-1527443154391-507e9dc6c5cc?auto=format&fit=crop&w=240&q=80" },
+  { icon: Battery, label: "Battery Problem", description: "Not charging or drains quickly", price: "₹1,999 - ₹3,999", image: "https://images.unsplash.com/photo-1617802690992-15d93263d3a9?auto=format&fit=crop&w=240&q=80" },
+  { icon: Keyboard, label: "Keyboard Fix", description: "Keys not working or stuck", price: "₹999 - ₹2,499", image: "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=240&q=80" },
+  { icon: HardDrive, label: "Storage/HDD", description: "Slow performance or data recovery", price: "₹1,499 - ₹4,999", image: "https://images.unsplash.com/photo-1591489378430-ef2f4c626b35?auto=format&fit=crop&w=240&q=80" },
+  { icon: Cpu, label: "Motherboard", description: "Not powering on or random shutdowns", price: "₹2,999 - ₹7,999", image: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=240&q=80" },
+  { icon: Wifi, label: "WiFi/Network", description: "Can't connect to internet", price: "₹799 - ₹1,999", image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=240&q=80" },
+  { icon: Shield, label: "Not Sure / Need Diagnosis", description: "Let our technician identify the issue", price: "Free Checkup", image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=240&q=80" },
 ];
 
 const pcRepairIssues = [
-  { icon: Monitor, label: "Display Issue", description: "No display or screen problems", price: "â‚¹1,999 - â‚¹4,999" },
-  { icon: Cpu, label: "CPU Problem", description: "Overheating or slow performance", price: "â‚¹2,499 - â‚¹6,999" },
-  { icon: HardDrive, label: "Storage/HDD", description: "Slow performance or data recovery", price: "â‚¹1,499 - â‚¹4,999" },
-  { icon: Cpu, label: "Motherboard", description: "Not powering on or random restarts", price: "â‚¹3,499 - â‚¹8,999" },
-  { icon: Wifi, label: "Network Card", description: "Internet connectivity issues", price: "â‚¹999 - â‚¹2,499" },
-  { icon: Monitor, label: "Graphics Card", description: "Display artifacts or gaming issues", price: "â‚¹2,999 - â‚¹9,999" },
-  { icon: Shield, label: "Not Sure / Need Diagnosis", description: "Let our technician identify the issue", price: "Free Checkup" },
+  { icon: Monitor, label: "Display Issue", description: "No display or screen problems", price: "₹1,999 - ₹4,999", image: "https://images.unsplash.com/photo-1547082299-de196ea013d6?auto=format&fit=crop&w=240&q=80" },
+  { icon: Cpu, label: "CPU Problem", description: "Overheating or slow performance", price: "₹2,499 - ₹6,999", image: "https://images.unsplash.com/photo-1587202372616-b43abea06c2a?auto=format&fit=crop&w=240&q=80" },
+  { icon: HardDrive, label: "Storage/HDD", description: "Slow performance or data recovery", price: "₹1,499 - ₹4,999", image: "https://images.unsplash.com/photo-1597852074816-d933c7d2b988?auto=format&fit=crop&w=240&q=80" },
+  { icon: Cpu, label: "Motherboard", description: "Not powering on or random restarts", price: "₹3,499 - ₹8,999", image: "https://images.unsplash.com/photo-1555617981-dac3880eac6e?auto=format&fit=crop&w=240&q=80" },
+  { icon: Wifi, label: "Network Card", description: "Internet connectivity issues", price: "₹999 - ₹2,499", image: "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=240&q=80" },
+  { icon: Monitor, label: "Graphics Card", description: "Display artifacts or gaming issues", price: "₹2,999 - ₹9,999", image: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=240&q=80" },
+  { icon: Shield, label: "Not Sure / Need Diagnosis", description: "Let our technician identify the issue", price: "Free Checkup", image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=240&q=80" },
 ];
 
 // Mapping from service page titles to booking modal issue labels
@@ -113,6 +113,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showStateSuggestions, setShowStateSuggestions] = useState(false);
   const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
+
   const stateInputRef = useRef<HTMLDivElement>(null);
   const districtInputRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
@@ -333,8 +334,8 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
       issue: selectedIssues.join(", ") || "General Service",
       date: new Date().toISOString(),
       status: "Active",
-      cost: "â‚¹0",
-      discount: "â‚¹0",
+      cost: "₹0",
+      discount: "₹0",
       rating: 0,
       otp: dummyOtp,
       customerName: formData.name,
@@ -390,7 +391,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                     isActive ? 'border-2 border-primary bg-primary/10 text-primary scale-110' :
                     'border-2 border-border bg-muted text-muted-foreground'
                   }`}>
-                    {isCompleted ? 'âœ“' : stepNum}
+                    {isCompleted ? '✓' : stepNum}
                   </div>
                   <span className={`text-xs lg:text-sm font-medium transition-colors ${
                     isActive || isCompleted ? 'text-foreground' : 'text-muted-foreground'
@@ -555,56 +556,76 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
 
           {/* Step 2: Issue Selection */}
           {step === 2 && (
-            <div className="space-y-4 sm:space-y-8 p-4 sm:p-8">
-              <div className="text-center">
-                <h2 className="text-xl sm:text-3xl font-display font-bold text-foreground mb-1 sm:mb-3">
-                  What's the Problem?
+            <div className="space-y-4 sm:space-y-6 p-4 sm:p-8">
+              {/* Header with floating count */}
+              <div className="text-center relative">
+                <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-4 py-1.5 mb-3">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs font-medium text-primary">Step 3 of 5</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1">
+                  What needs fixing?
                 </h2>
-                <p className="text-muted-foreground text-xs sm:text-base">
-                  Select all issues that apply â€¢ Multiple selections allowed
+                <p className="text-muted-foreground text-xs sm:text-sm">
+                  Tap to select • Pick multiple if needed
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3">
+              {/* Service cards — innovative stacked layout */}
+              <div className="space-y-2.5 sm:space-y-3">
                 {repairIssues.map((issue) => {
                   const isSelected = selectedIssues.includes(issue.label);
-                  const isNotSure = issue.label.includes("Not Sure");
                   return (
                     <button
                       key={issue.label}
                       onClick={() => toggleIssue(issue.label)}
-                      className={`group relative rounded-xl border-2 transition-all duration-300 overflow-hidden ${
+                      className={`w-full flex items-center gap-3 sm:gap-4 rounded-2xl border-2 p-3 sm:p-4 text-left transition-all duration-300 group ${
                         isSelected
-                          ? "border-primary bg-gradient-to-br from-primary/10 to-accent/5 shadow-lg sm:scale-[1.02]"
-                          : "border-border hover:border-primary/40 bg-card hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent/5 sm:hover:scale-[1.02] hover:shadow-md"
-                      } ${isNotSure ? "col-span-2 bg-gradient-to-r from-accent/5 to-warning/5" : ""} ${
-                        isNotSure ? "p-3 sm:p-5" : "p-3 sm:p-5"
+                          ? "border-primary bg-gradient-to-r from-primary/5 via-primary/3 to-transparent shadow-lg shadow-primary/10 scale-[1.01]"
+                          : "border-transparent bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:border-gray-200"
                       }`}
                     >
-                      {isSelected && (
-                        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 rounded-full gradient-hero flex items-center justify-center shadow-md z-10">
-                          <Check className="w-3 h-3 sm:w-4 sm:h-4 text-primary-foreground" />
-                        </div>
-                      )}
-                      {/* Mobile: centered vertical, Desktop: horizontal */}
-                      <div className={`flex ${isNotSure ? "flex-row items-center gap-3" : "flex-col items-center text-center"} sm:flex-row sm:items-start sm:text-left sm:gap-4`}>
-                        <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                          isSelected ? "gradient-hero text-primary-foreground shadow-lg sm:scale-110" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-                        }`}>
-                          <issue.icon className="w-4 h-4 sm:w-6 sm:h-6" />
-                        </div>
-                        <div className={`${isNotSure ? "flex-1 text-left" : "mt-2 sm:mt-0"} sm:flex-1 sm:pr-8`}>
-                          <p className={`font-semibold text-xs sm:text-base mb-0.5 sm:mb-2 transition-colors leading-tight ${
-                            isSelected ? "text-primary" : "text-foreground group-hover:text-primary"
+                      {/* Icon */}
+                      <div className={`relative shrink-0 h-11 w-11 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                        isSelected
+                          ? "bg-primary text-white shadow-md shadow-primary/30 rotate-0"
+                          : "bg-white dark:bg-gray-800 text-gray-400 group-hover:text-primary group-hover:shadow-sm border border-gray-100 dark:border-gray-700"
+                      }`}>
+                        <issue.icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                      </div>
+
+                      {/* Text */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-sm sm:text-base font-semibold truncate transition-colors ${
+                            isSelected ? "text-primary" : "text-foreground"
                           }`}>
                             {issue.label}
                           </p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed mb-1 sm:mb-2 hidden sm:block">{issue.description}</p>
-                          <div className={`inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold ${
-                            isNotSure ? "bg-accent/20 text-accent" : "bg-muted text-foreground"
-                          }`}>
-                            {issue.price}
-                          </div>
+                          {issue.price === "Free Checkup" && (
+                            <span className="shrink-0 text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-md uppercase tracking-wide">
+                              Free
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+                          {issue.description}
+                        </p>
+                      </div>
+
+                      {/* Price + check */}
+                      <div className="shrink-0 flex items-center gap-2.5">
+                        <span className={`hidden sm:block text-xs font-semibold transition-colors ${
+                          isSelected ? "text-primary" : "text-muted-foreground"
+                        }`}>
+                          {issue.price}
+                        </span>
+                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                          isSelected
+                            ? "border-primary bg-primary text-white scale-110"
+                            : "border-gray-300 dark:border-gray-600 group-hover:border-primary/40"
+                        }`}>
+                          {isSelected && <Check className="h-3.5 w-3.5" />}
                         </div>
                       </div>
                     </button>
@@ -612,10 +633,20 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                 })}
               </div>
 
-              {/* Image Upload */}
+              {/* Selected count badge */}
+              {selectedIssues.length > 0 && (
+                <div className="flex items-center justify-center">
+                  <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-3 py-1.5 rounded-full">
+                    <Check className="h-3.5 w-3.5" />
+                    {selectedIssues.length} service{selectedIssues.length > 1 ? "s" : ""} selected
+                  </div>
+                </div>
+              )}
+
+              {/* Image Upload — compact */}
               <label
                 htmlFor="issue-image-upload"
-                className="relative block p-4 lg:p-6 border-2 border-dashed border-border rounded-xl text-center hover:border-primary/50 hover:bg-accent/5 transition-all duration-200 cursor-pointer group"
+                className="relative flex items-center gap-3 p-3 sm:p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl hover:border-primary/40 hover:bg-primary/[0.02] transition-all duration-200 cursor-pointer group"
               >
                 <input
                   type="file"
@@ -625,9 +656,16 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
                 {imagePreview ? (
-                  <div className="space-y-3">
-                    <img src={imagePreview} alt="Issue preview" className="max-h-40 mx-auto rounded-lg object-contain" />
-                    <p className="text-xs text-primary font-medium">Image uploaded! Click to change</p>
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <ImageIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">
+                        {formData.image?.name || "Image uploaded"}
+                      </p>
+                      <p className="text-[11px] text-primary">Tap to change</p>
+                    </div>
                     <button
                       type="button"
                       onClick={(e) => {
@@ -638,22 +676,24 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                         const input = document.getElementById('issue-image-upload') as HTMLInputElement;
                         if (input) input.value = '';
                       }}
-                      className="text-xs text-destructive hover:underline font-medium"
+                      className="text-xs text-destructive hover:underline font-medium shrink-0"
                     >
-                      Remove Image
+                      Remove
                     </button>
                   </div>
                 ) : (
                   <>
-                    <div className="w-9 h-9 lg:w-12 lg:h-12 mx-auto mb-2 lg:mb-3 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                      <Upload className="w-4 h-4 lg:w-6 lg:h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                      <Upload className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
                     </div>
-                    <p className="text-xs lg:text-sm font-medium text-foreground mb-1">
-                      Upload images of the issue
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Optional - helps us diagnose better
-                    </p>
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium text-foreground">
+                        Attach a photo <span className="text-muted-foreground font-normal">(optional)</span>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Helps us diagnose faster
+                      </p>
+                    </div>
                   </>
                 )}
               </label>
@@ -965,7 +1005,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                   <div>
                     <p className="text-xs lg:text-sm text-muted-foreground mb-1">Estimated Price Range</p>
                     <p className="text-xl lg:text-2xl font-display font-bold text-foreground">
-                      {deviceType === "laptop" ? "â‚¹799 - â‚¹7,999" : "â‚¹999 - â‚¹9,999"}
+                      {deviceType === "laptop" ? "₹799 - ₹7,999" : "₹999 - ₹9,999"}
                     </p>
                   </div>
                 </div>
@@ -1015,7 +1055,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                 {/* Success Message */}
                 <div className="space-y-4 mb-8">
                   <h2 className="text-4xl font-display font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                    Booking Confirmed! ðŸŽ‰
+                    Booking Confirmed!
                   </h2>
                   <p className="text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed">
                     Excellent choice! Our expert technicians are ready to help.
@@ -1028,12 +1068,12 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                   {bookingOtp ? (
                     <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-300 shadow-lg">
                       <div className="flex items-center justify-center gap-2 mb-3">
-                        <span className="text-3xl">ðŸ”</span>
+                        <span className="text-3xl">🔐</span>
                         <p className="font-bold text-blue-900 text-xl">Your Service OTP</p>
                       </div>
                       <p className="text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-blue-600 tracking-widest mb-3">{bookingOtp}</p>
                       <div className="p-3 bg-blue-100 rounded-lg">
-                        <p className="text-sm text-blue-900 font-semibold mb-1">âš ï¸ IMPORTANT: Save This OTP</p>
+                        <p className="text-sm text-blue-900 font-semibold mb-1">IMPORTANT: Save This OTP</p>
                         <p className="text-xs text-blue-800">You'll need to share this OTP with the technician to verify service completion</p>
                       </div>
                     </div>
@@ -1046,7 +1086,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                   <div className="p-6 bg-gradient-to-br from-card to-card/50 rounded-2xl border-2 border-primary/20 shadow-xl">
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-                        <span className="text-xl">ðŸ“ž</span>
+                        <span className="text-xl">📞</span>
                       </div>
                       <p className="text-sm font-semibold text-muted-foreground">We'll Contact You At</p>
                     </div>

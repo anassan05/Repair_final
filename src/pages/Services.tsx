@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { 
   Monitor, 
   Battery, 
@@ -20,13 +20,16 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import BookingModal from "@/components/BookingModal";
+import ServiceCardGallery from "@/components/ServiceCardGallery";
+import type { ServiceItem } from "@/components/ServiceCardGallery";
 
 interface ServicesProps {
-  currentUser: { name: string; phone: string } | null;
+  currentUser?: { name: string; phone: string } | null;
 }
 
 const Services = ({ currentUser }: ServicesProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Modal state
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -39,11 +42,12 @@ const Services = ({ currentUser }: ServicesProps) => {
     if (state?.selectedService) {
       setSelectedService(state.selectedService);
       setSelectedDeviceType(state.deviceType || "laptop");
+      setSelectedType(state.deviceType || "laptop");
       setIsBookingOpen(true);
-      // Clear the state so it doesn't re-trigger on navigation
-      window.history.replaceState({}, document.title);
+      // Clear route state so refresh/back doesn't retrigger modal
+      navigate(location.pathname, { replace: true, state: null });
     }
-  }, [location.state]);
+  }, [location.state, location.pathname, navigate]);
 
   const handleBookRepair = () => {
     setSelectedService(null);
@@ -51,9 +55,6 @@ const Services = ({ currentUser }: ServicesProps) => {
   };
 
   const handleServiceClick = (service: {title: string; price: string; warranty: string}, type: "laptop" | "pc") => {
-    console.log('==================');
-    console.log('SERVICE CLICKED:', service, 'Type:', type);
-    console.log('==================');
     setSelectedService(service);
     setSelectedDeviceType(type);
     setIsBookingOpen(true);
@@ -82,11 +83,11 @@ const Services = ({ currentUser }: ServicesProps) => {
 
   return (
     <>
-    <div className="min-h-screen bg-white dark:bg-background text-foreground page-enter">
+    <div className="min-h-screen relative z-[1] text-foreground page-enter">
       <Header />
       
       {/* Hero Section */}
-      <section className="relative min-h-screen bg-[#f4faff] dark:bg-[#10151b] flex items-center pt-16 sm:pt-20 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative min-h-[68vh] lg:min-h-[78vh] bg-[#f4faff] dark:bg-[#10151b] flex items-center pt-16 sm:pt-20 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto w-full">
           <div className="max-w-4xl">
             <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 mb-6 sm:mb-8">
@@ -160,7 +161,9 @@ const Services = ({ currentUser }: ServicesProps) => {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Laptop className="w-4 h-4" />
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-primary/90">
+                  <Laptop className="w-4 h-4 text-white" />
+                </span>
                 Laptop
                 <span className="hidden sm:inline">Services</span>
               </button>
@@ -172,48 +175,18 @@ const Services = ({ currentUser }: ServicesProps) => {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <PcCase className="w-4 h-4" />
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-primary/90">
+                  <PcCase className="w-4 h-4 text-white" />
+                </span>
                 Desktop
                 <span className="hidden sm:inline">PC Services</span>
               </button>
             </div>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {services.map((service, index) => (
-              <div
-                key={service.title}
-                onClick={() => handleServiceClick(service, selectedType)}
-                className="group relative bg-card rounded-2xl p-4 sm:p-6 border border-border hover:border-primary/30 shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="w-14 h-14 rounded-xl gradient-hero flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                  <service.icon className="w-7 h-7 text-primary-foreground" />
-                </div>
-                <h3 className="text-xl font-display font-semibold text-foreground mb-2">
-                  {service.title}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {service.description}
-                </p>
-                <div className="flex items-center justify-between pt-4 border-t border-border mb-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Starting from</p>
-                    <p className="text-xl font-display font-bold text-foreground">{service.price}</p>
-                  </div>
-                  <div className="px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                    {service.warranty} Warranty
-                  </div>
-                </div>
-                <Button
-                  variant="hero"
-                  className="w-full"
-                  onClick={() => handleServiceClick(service, selectedType)}
-                >
-                  Book This Service
-                </Button>
-              </div>
-            ))}
-          </div>
+          <ServiceCardGallery
+            services={services}
+            onServiceClick={(svc: ServiceItem) => handleServiceClick(svc, selectedType)}
+          />
         </div>
       </section>
 

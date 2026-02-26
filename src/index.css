@@ -116,8 +116,14 @@
 
   body {
     overflow-x: hidden;
-  position: relative;
-}
+    position: relative;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 25%, #f0f4ff 50%, #ffffff 75%, #f8fafc 100%);
+  }
+
+  .dark body,
+  body.dark {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  }
 
 /* Scroll progress bar */
 body::before {
@@ -162,7 +168,6 @@ body.is-scrolling::after {
   }
 
   body {
-    background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: 'Inter', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -261,27 +266,9 @@ body.is-scrolling::after {
     animation: sectionPulse 0.6s ease-in-out;
   }
 
-  .section-flash {
-    animation: sectionFlash 1s ease-out;
-  }
-
-  /* Smooth section transitions */
-  section, main > div {
-    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-  }
-
-  /* Removed blur effect - use GPU acceleration instead */
-  body.is-scrolling section:not(.highlight-scroll) {
-    will-change: transform;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-  }
-
-  /* Parallax effect for sections */
-  @media (prefers-reduced-motion: no-preference) {
-    section {
-      will-change: transform;
-    }
+  /* Smooth section transitions – only on elements that explicitly opt-in */
+  .scroll-reveal {
+    animation: scrollReveal 0.8s ease-out forwards;
   }
 
   .animate-slide-left {
@@ -327,6 +314,8 @@ body.is-scrolling::after {
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
   .stagger-6 { animation-delay: 0.6s; }
+  .stagger-7 { animation-delay: 0.7s; }
+  .stagger-8 { animation-delay: 0.8s; }
 
   /* Hover effects */
   .hover-lift {

@@ -2,18 +2,44 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Index from "./pages/Index";
-import Services from "./pages/Services";
 import Profile from "./pages/Profile";
 import Membership from "./pages/Membership";
 import Contact from "./pages/Contact";
+import Services from "./pages/Services";
 import UserLogin from "./pages/UserLogin";
 import NotFound from "./pages/NotFound";
 import IconTest from "./components/ImageTest";
+import ParticleCanvas from "./components/ParticleCanvas";
+import FloatingBubbles from "./components/FloatingBubbles";
 
 const queryClient = new QueryClient();
+
+/** Renders ParticleCanvas + FloatingBubbles on every page except /profile.
+ *  On mobile (< 768px) both canvases are disabled entirely for performance. */
+const ConditionalParticles = () => {
+  const { pathname } = useLocation();
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  if (pathname === "/profile" || pathname === "/services") return null;
+  if (isMobile) return <FloatingBubbles />;
+  return (
+    <>
+      <FloatingBubbles />
+      <ParticleCanvas excludeSelector={pathname === "/" ? "#home-dots-exclude" : undefined} />
+    </>
+  );
+};
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState<{ name: string; phone: string } | null>(null);
@@ -47,6 +73,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ConditionalParticles />
           <Routes>
             <Route path="/login" element={
               currentUser ? <Navigate to="/" /> : <UserLogin onLogin={handleLogin} />
@@ -55,9 +82,7 @@ const App = () => {
             <Route path="/" element={
               currentUser ? <Index currentUser={currentUser} /> : <Navigate to="/login" />
             } />
-            <Route path="/services" element={
-              currentUser ? <Services currentUser={currentUser} /> : <Navigate to="/login" />
-            } />
+            <Route path="/services" element={<Services currentUser={currentUser} />} />
             <Route path="/membership" element={
               currentUser ? <Membership currentUser={currentUser} /> : <Navigate to="/login" />
             } />

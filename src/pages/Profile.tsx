@@ -16,7 +16,9 @@ import {
   Trash2,
   Edit,
   Info,
-  LogOut
+  LogOut,
+  Moon,
+  Sun
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,32 +33,41 @@ import { indianStatesAndDistricts, allStates } from "@/data/indianLocations";
 import { useToast } from "@/hooks/use-toast";
 
 const USER_BOOKINGS_KEY = "userBookings";
+const LEGACY_DUMMY_ADDRESS_KEYS = new Set([
+  "home|123 tech street, bangalore|bangalore|karnataka|560001",
+  "office|45 business park, mg road|bangalore|karnataka|560002",
+]);
+
+const normalizeAddressKey = (address: {
+  type?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+}) =>
+  [address.type, address.address, address.city, address.state, address.pincode]
+    .map((value) => String(value ?? "").trim().toLowerCase())
+    .join("|");
+
+const isAddressLike = (
+  value: unknown
+): value is { type?: string; address?: string; city?: string; state?: string; pincode?: string } =>
+  !!value && typeof value === "object";
+
+const sanitizeLegacyAddresses = (addresses: unknown) => {
+  if (!Array.isArray(addresses)) return [];
+  return addresses.filter((address) => {
+    if (!isAddressLike(address)) return false;
+    return !LEGACY_DUMMY_ADDRESS_KEYS.has(normalizeAddressKey(address));
+  });
+};
 
 // Mock user data
 const initialUserData = {
   name: "Mohammed Anas",
   email: "mohammed.anas@example.com",
   phone: "+91 98765 43210",
-  addresses: [
-    {
-      id: 1,
-      type: "Home",
-      address: "123 Tech Street, Bangalore",
-      city: "Bangalore",
-      state: "Karnataka",
-      pincode: "560001",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      type: "Office",
-      address: "45 Business Park, MG Road",
-      city: "Bangalore",
-      state: "Karnataka",
-      pincode: "560002",
-      isDefault: false,
-    },
-  ],
+  addresses: [],
   memberSince: "January 2025",
   membership: {
     plan: "Pro",
@@ -67,8 +78,8 @@ const initialUserData = {
   },
   stats: {
     totalRepairs: 8,
-    totalSpent: "â‚¹24,850",
-    savedAmount: "â‚¹4,970",
+    totalSpent: "₹24,850",
+    savedAmount: "₹4,970",
     avgRating: 4.8,
   },
 };
@@ -77,7 +88,11 @@ const getInitialProfile = (currentUser: { name: string; phone: string }) => {
   const stored = sessionStorage.getItem("userProfile");
   if (stored) {
     try {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      return {
+        ...parsed,
+        addresses: sanitizeLegacyAddresses(parsed?.addresses),
+      };
     } catch (e) {}
   }
 
@@ -136,6 +151,14 @@ const formatINR = (amount: number): string =>
     maximumFractionDigits: 0,
   }).format(amount);
 
+const normalizeAmountDisplay = (value: unknown): string => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return formatINR(value);
+  }
+  if (typeof value !== "string") return "₹0";
+  return value.replace(/â‚¹/g, "₹").trim();
+};
+
 interface Address {
   id: number;
   type: string;
@@ -156,6 +179,9 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
   const { toast } = useToast();
   const [userData, setUserData] = useState(() => getInitialProfile(currentUser));
   const [editedData, setEditedData] = useState(userData);
+  const [theme, setTheme] = useState<"light" | "dark">(() =>
+    document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
@@ -177,6 +203,17 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
   const stateInputRef = useRef<HTMLDivElement>(null);
   const districtInputRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    document.documentElement.classList.toggle('dark', next === 'dark');
+    localStorage.setItem('theme', next);
+  };
+
   // Save profile to sessionStorage whenever userData changes
   useEffect(() => {
     sessionStorage.setItem('userProfile', JSON.stringify(userData));
@@ -188,7 +225,9 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
     if (savedAddressesFromStorage) {
       try {
         const savedAddresses = JSON.parse(savedAddressesFromStorage);
-        setUserData(prev => ({ ...prev, addresses: savedAddresses }));
+        const cleanedAddresses = sanitizeLegacyAddresses(savedAddresses);
+        setUserData(prev => ({ ...prev, addresses: cleanedAddresses }));
+        sessionStorage.setItem('userAddresses', JSON.stringify(cleanedAddresses));
       } catch (e) {}
     }
   }, []);
@@ -353,7 +392,7 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background text-foreground flex flex-col">
+    <div className="min-h-screen relative z-[1] text-foreground flex flex-col">
       <Header />
       
       <main className="flex-1 pt-24 pb-16">
@@ -361,17 +400,17 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
           {/* Profile Header */}
           <Card className="p-4 sm:p-6 mb-4 sm:mb-6">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6 mb-4">
-              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                 <div className="relative flex-shrink-0">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl gradient-hero flex items-center justify-center">
-                    <User className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" />
+                  <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-xl gradient-hero flex items-center justify-center">
+                    <User className="w-6 h-6 sm:w-10 sm:h-10 text-primary-foreground" />
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-7 h-7 sm:w-8 sm:h-8 rounded-full gradient-hero flex items-center justify-center border-2 border-card">
-                    <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-foreground" />
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-8 sm:h-8 rounded-full gradient-hero flex items-center justify-center border-2 border-card">
+                    <Crown className="w-2.5 h-2.5 sm:w-4 sm:h-4 text-primary-foreground" />
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-1 leading-tight break-words">
+                  <h1 className="text-base sm:text-2xl font-display font-bold text-foreground mb-1 leading-tight truncate">
                     {userData.name}
                   </h1>
                   <Badge className="gradient-hero border-0 text-primary-foreground text-xs sm:text-sm">
@@ -379,11 +418,11 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                   </Badge>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-end sm:self-start">
+              <div className="flex flex-wrap items-center gap-2 sm:flex-row sm:justify-end sm:self-start">
               {!isEditing ? (
-                <Button onClick={handleEdit} className="w-full sm:w-auto">Edit Profile</Button>
+                <Button onClick={handleEdit} className="flex-1 sm:flex-initial">Edit Profile</Button>
               ) : (
-                <div className="flex gap-2 w-full sm:w-auto">
+                <>
                   <Button onClick={handleSave} variant="hero" className="flex-1 sm:flex-initial">
                     <Save className="w-4 h-4" />
                     <span className="hidden sm:inline">Save</span>
@@ -392,9 +431,19 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                     <X className="w-4 h-4" />
                     <span className="hidden sm:inline">Cancel</span>
                   </Button>
-                </div>
+                </>
               )}
-                <Button onClick={onLogout} variant="outline" className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleTheme}
+                className="w-10 h-10 p-0 flex items-center justify-center"
+                aria-label="Toggle theme"
+                title="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </Button>
+                <Button onClick={onLogout} variant="outline" className="flex-1 sm:flex-initial">
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </Button>
@@ -808,9 +857,9 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
                       <p className="text-xs sm:text-sm text-muted-foreground">{repair.issue}</p>
                     </div>
                     <div className="text-left sm:text-right">
-                      <p className="text-base sm:text-lg font-bold">{repair.cost}</p>
-                      {repair.discount && repair.discount !== "â‚¹0" && (
-                        <p className="text-xs text-accent">Saved {repair.discount}</p>
+                      <p className="text-base sm:text-lg font-bold">{normalizeAmountDisplay(repair.cost)}</p>
+                      {repair.discount && normalizeAmountDisplay(repair.discount) !== "₹0" && (
+                        <p className="text-xs text-accent">Saved {normalizeAmountDisplay(repair.discount)}</p>
                       )}
                     </div>
                   </div>
@@ -870,12 +919,12 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
               {selectedRepair.otp && (
                 <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-300 shadow-lg">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-3xl">ðŸ”</span>
+                    <span className="text-3xl">🔐</span>
                     <p className="font-bold text-blue-900 text-xl">Your Service OTP</p>
                   </div>
                   <p className="text-4xl sm:text-5xl font-mono font-bold text-blue-600 tracking-wider mb-3">{selectedRepair.otp}</p>
                   <div className="p-3 bg-blue-100 rounded-lg">
-                    <p className="text-sm text-blue-900 font-semibold mb-1">âš ï¸ IMPORTANT: Save This OTP</p>
+                    <p className="text-sm text-blue-900 font-semibold mb-1">IMPORTANT: Save This OTP</p>
                     <p className="text-xs text-blue-800">Share this with the worker to verify service completion</p>
                   </div>
                 </div>
@@ -910,12 +959,12 @@ const Profile = ({ currentUser, onLogout }: ProfileProps) => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-semibold text-muted-foreground">Cost</p>
-                  <p className="text-lg font-bold">{selectedRepair.cost}</p>
+                  <p className="text-lg font-bold">{normalizeAmountDisplay(selectedRepair.cost)}</p>
                 </div>
-                {selectedRepair.discount && selectedRepair.discount !== "â‚¹0" && (
+                {selectedRepair.discount && normalizeAmountDisplay(selectedRepair.discount) !== "₹0" && (
                   <div>
                     <p className="text-sm font-semibold text-muted-foreground">Discount Applied</p>
-                    <p className="text-lg font-bold text-accent">{selectedRepair.discount}</p>
+                    <p className="text-lg font-bold text-accent">{normalizeAmountDisplay(selectedRepair.discount)}</p>
                   </div>
                 )}
               </div>

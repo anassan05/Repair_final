@@ -3,8 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import BookingModal from "@/components/BookingModal";
+import ServiceCardGallery, { type ServiceItem } from "@/components/ServiceCardGallery";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useToast } from "@/hooks/use-toast";
+import gsap from "gsap";
 import {
   ArrowRight,
   Shield,
@@ -48,6 +50,8 @@ interface IndexProps {
 
 const Index = ({ currentUser }: IndexProps) => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [preselectedService, setPreselectedService] = useState<{ title: string; type: "laptop" | "pc" } | null>(null);
+  const navigate = useNavigate();
   const location = useLocation();
   const homeRef = useScrollReveal('zoom-in');
   const statsRef = useScrollReveal('fade-up', 100);
@@ -58,17 +62,23 @@ const Index = ({ currentUser }: IndexProps) => {
   const testimonialsRef = useScrollReveal('bounce', 350);
   const contactRef = useScrollReveal('zoom-in', 400);
 
-  const openBooking = () => setIsBookingOpen(true);
+  const openBooking = () => {
+    setPreselectedService(null);
+    setIsBookingOpen(true);
+  };
 
-  // When navigated with a hash (e.g., '/#services'), auto-scroll to that section
+  const handleServiceBooking = (service: { title: string; type: "laptop" | "pc" }) => {
+    setPreselectedService(service);
+    setIsBookingOpen(true);
+  };
+
   useEffect(() => {
     if (location.hash) {
       const doScroll = () => {
         const element = document.querySelector(location.hash);
         if (!element) return;
-        // Visual feedback
         document.body.classList.add('is-scrolling');
-        const target = element.getBoundingClientRect().top + window.scrollY - 80;
+        const target = (element as HTMLElement).getBoundingClientRect().top + window.scrollY - 80;
         window.scrollTo({ top: target, behavior: 'smooth' });
         element.classList.add('highlight-scroll', 'active-section', 'section-flash');
         setTimeout(() => {
@@ -76,24 +86,25 @@ const Index = ({ currentUser }: IndexProps) => {
           element.classList.remove('highlight-scroll', 'section-flash');
         }, 1000);
       };
-      // Delay slightly to ensure sections are mounted
       setTimeout(doScroll, 50);
     }
   }, [location.hash]);
 
   return (
     <>
-      <div className="min-h-screen bg-white dark:bg-background overflow-hidden">
+      <div className="min-h-screen relative z-[1] overflow-hidden">
         <Header onBookRepair={openBooking} />
         <main className="page-enter">
-          <section id="home" ref={homeRef} className="opacity-0 transition-all duration-1000 transform">
-            <HeroSection onBookRepair={openBooking} />
-          </section>
-          <div ref={statsRef} className="opacity-0 transition-all duration-1000 transform">
-            <StatsSection />
+          <div id="home-dots-exclude">
+            <section id="home" ref={homeRef} className="opacity-0 transition-all duration-1000 transform">
+              <HeroSection onBookRepair={openBooking} />
+            </section>
+            <div ref={statsRef} className="opacity-0 transition-all duration-1000 transform">
+              <StatsSection />
+            </div>
           </div>
           <section id="services" ref={servicesRef} className="opacity-0 transition-all duration-1000 transform">
-            <ServicesSection />
+            <ServicesSection onBookService={handleServiceBooking} />
           </section>
           <div ref={brandsRef} className="opacity-0 transition-all duration-1000 transform">
             <BrandsSection />
@@ -115,8 +126,12 @@ const Index = ({ currentUser }: IndexProps) => {
       </div>
       <BookingModal
         isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
+        onClose={() => {
+          setIsBookingOpen(false);
+          setPreselectedService(null);
+        }}
         currentUser={currentUser}
+        preselectedService={preselectedService}
       />
     </>
   );
@@ -124,56 +139,84 @@ const Index = ({ currentUser }: IndexProps) => {
 
 // Hero Section Component
 const HeroSection = ({ onBookRepair }: { onBookRepair?: () => void }) => {
-  const navigate = useNavigate();
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const animRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
+  const headingWords = ["Expert", "Laptop", "Repair", "\n", "at", "Your", "Doorstep"];
 
-  const commonIssues = [
-    { icon: Monitor, title: "Screen Damage" },
-    { icon: Battery, title: "Battery Replacement" },
-    { icon: Keyboard, title: "Keyboard Fix" },
-    { icon: AlertTriangle, title: "System Lag" }
-  ];
+  useEffect(() => {
+    const heading = headingRef.current;
+    if (!heading) return;
+    const wordSpans = heading.querySelectorAll<HTMLElement>('.hero-word');
+    if (!wordSpans.length) return;
+    animRef.current?.revert?.();
+    animRef.current = gsap.from(wordSpans, {
+      y: -100,
+      opacity: 0,
+      rotation: () => gsap.utils.random(-80, 80),
+      duration: 0.7,
+      ease: "back",
+      stagger: 0.15,
+    });
+
+    return () => {
+      animRef.current?.revert?.();
+    };
+  }, []);
 
   return (
-    <section id="home" className="relative min-h-screen bg-[#f4faff] dark:bg-[#10151b] flex items-center pt-16 sm:pt-20 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8">
+    <section id="home" className="relative min-h-[68vh] lg:min-h-[78vh] flex items-center pt-16 sm:pt-20 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8 animate-fade-in">
       <div className="max-w-7xl mx-auto w-full">
         <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 mb-6 sm:mb-8 animate-bounce-in">
             <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500 dark:text-blue-300" />
             <span className="text-blue-600 dark:text-blue-200 text-xs sm:text-sm font-medium">Certified Apple & PC Specialists</span>
           </div>
           <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
-            <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight">
-              Expert Laptop Repair<br />
-              at Your <span className="text-blue-500 dark:text-blue-400">Doorstep</span>
+            <h1
+              ref={headingRef}
+              className="text-3xl sm:text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight"
+            >
+              {headingWords.map((word, idx) =>
+                word === "\n" ? (
+                  <br key={`br-${idx}`} />
+                ) : (
+                  <span
+                    key={idx}
+                    className={`hero-word inline-block me-2 ${word === "Doorstep" ? "text-blue-500 dark:text-blue-400" : ""}`}
+                  >
+                    {word}
+                  </span>
+                )
+              )}
             </h1>
-            <p className="text-gray-700 dark:text-gray-300 text-base sm:text-xl max-w-2xl leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 text-base sm:text-xl max-w-2xl leading-relaxed animate-fade-up">
               Get your laptop fixed right in front of you. Transparent pricing, genuine parts, and 60-days warranty on all repair
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-10 sm:mb-16">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-10">
             <Button
               onClick={onBookRepair}
-              className="bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 text-white px-6 sm:px-8 py-3 text-base sm:text-lg font-semibold rounded-lg shadow-md transition-all duration-300 hover:scale-105 w-full sm:w-auto"
+              className="bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 text-white px-6 sm:px-8 py-3 text-base sm:text-lg font-semibold rounded-lg shadow-md transition-all duration-300 hover:scale-110 w-full sm:w-auto animate-pulse-soft"
             >
               Book a Repair
             </Button>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-4xl mx-auto mt-6 sm:mt-8">
-          <div className="text-center space-y-2 sm:space-y-3">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto">
+          <div className="text-center space-y-2 sm:space-y-3 animate-fade-up stagger-1">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-white/50 flex items-center justify-center mx-auto">
               <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 dark:text-blue-400" />
             </div>
             <p className="text-gray-700 dark:text-gray-200 font-semibold text-xs sm:text-base">Guaranteed Warranty</p>
           </div>
-          <div className="text-center space-y-2 sm:space-y-3">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto">
+          <div className="text-center space-y-2 sm:space-y-3 animate-fade-up stagger-2">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-white/50 flex items-center justify-center mx-auto">
               <Award className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 dark:text-blue-400" />
             </div>
             <p className="text-gray-700 dark:text-gray-200 font-semibold text-xs sm:text-base">Verified Technicians</p>
           </div>
-          <div className="text-center space-y-2 sm:space-y-3">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto">
+          <div className="text-center space-y-2 sm:space-y-3 animate-fade-up stagger-3">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-white/50 flex items-center justify-center mx-auto">
               <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 dark:text-blue-400" />
             </div>
             <p className="text-gray-700 dark:text-gray-200 font-semibold text-xs sm:text-base">Same Day Service</p>
@@ -214,7 +257,7 @@ const StatsSection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-10 sm:py-16 bg-gradient-to-br from-primary to-primary/90 text-primary-foreground">
+    <section ref={sectionRef} className="py-10 sm:py-16 relative">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
           {stats.map((stat, index) => (
@@ -223,7 +266,7 @@ const StatsSection = () => {
               className="text-center animate-fade-up"
               style={{ animationDelay: `${index * 0.1}s`, opacity: isVisible ? 1 : 0 }}
             >
-              <div className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-primary-foreground mb-1 sm:mb-2">
+              <div className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-foreground mb-1 sm:mb-2">
                 {isVisible ? (
                   <CountUp
                     end={stat.value}
@@ -234,7 +277,7 @@ const StatsSection = () => {
                   "0"
                 )}
               </div>
-              <p className="text-sm md:text-base text-primary-foreground/70">{stat.label}</p>
+              <p className="text-sm md:text-base text-muted-foreground">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -274,11 +317,11 @@ const CountUp = ({ end, suffix, isDecimal }: { end: number; suffix: string; isDe
 };
 
 // Services Section Component
-const ServicesSection = () => {
+const ServicesSection = ({ onBookService }: { onBookService?: (service: { title: string; type: "laptop" | "pc" }) => void }) => {
   const [selectedType, setSelectedType] = useState<"laptop" | "pc">("laptop");
   const navigate = useNavigate();
 
-  const laptopServices = [
+  const laptopServices: ServiceItem[] = [
     { icon: Monitor, title: "Screen Replacement", description: "Cracked or damaged screen? We replace with genuine LCD/LED panels.", price: "₹2,499", warranty: "90 Days" },
     { icon: Battery, title: "Battery Replacement", description: "Restore your laptop's battery life with original capacity batteries.", price: "₹1,999", warranty: "180 Days" },
     { icon: Keyboard, title: "Keyboard Repair", description: "Fix broken keys or full keyboard replacement with exact matches.", price: "₹999", warranty: "90 Days" },
@@ -287,7 +330,7 @@ const ServicesSection = () => {
     { icon: Wifi, title: "WiFi/Network Fix", description: "Resolve connectivity issues and WiFi card replacements.", price: "₹799", warranty: "60 Days" },
   ];
 
-  const pcServices = [
+  const pcServices: ServiceItem[] = [
     { icon: Monitor, title: "Display/Monitor Fix", description: "Fix display issues, graphics card problems, and monitor connections.", price: "₹1,999", warranty: "90 Days" },
     { icon: Cpu, title: "CPU Upgrade/Repair", description: "Upgrade processors or fix overheating and performance issues.", price: "₹2,499", warranty: "180 Days" },
     { icon: HardDrive, title: "Storage Solutions", description: "SSD/HDD installation, upgrades, and data recovery services.", price: "₹1,499", warranty: "1 Year" },
@@ -323,7 +366,9 @@ const ServicesSection = () => {
                   : "text-muted-foreground hover:text-foreground"
                 }`}
             >
-              <Laptop className="w-4 h-4" />
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white border border-border">
+                <Laptop className="w-4 h-4 text-black" />
+              </span>
               Laptop
               <span className="hidden sm:inline">Services</span>
             </button>
@@ -334,57 +379,33 @@ const ServicesSection = () => {
                   : "text-muted-foreground hover:text-foreground"
                 }`}
             >
-              <PcCase className="w-4 h-4" />
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white border border-border">
+                <PcCase className="w-4 h-4 text-black" />
+              </span>
               Desktop
               <span className="hidden sm:inline">PC Services</span>
             </button>
           </div>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
-          {services.map((service, index) => (
-            <div
-              key={service.title}
-              className="group relative bg-card rounded-2xl p-4 sm:p-6 border border-border shadow-card transition-all duration-300 flex flex-col"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="w-14 h-14 rounded-xl gradient-hero flex items-center justify-center mb-5">
-                <service.icon className="w-7 h-7 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-display font-semibold text-foreground mb-2">
-                {service.title}
-              </h3>
-              <p className="text-muted-foreground mb-4 flex-1">
-                {service.description}
-              </p>
-              <div className="flex items-center justify-between pt-4 border-t border-border">
-                <div>
-                  <p className="text-sm text-muted-foreground">Starting from</p>
-                  <p className="text-xl font-display font-bold text-foreground">{service.price}</p>
-                </div>
-                <div className="px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                  {service.warranty} Warranty
-                </div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-border">
-                <Button
-                  variant="hero"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => navigate('/services', { state: { selectedService: { title: service.title, price: service.price, warranty: service.warranty }, deviceType: selectedType } })}
-                >
-                  Book this Service
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="text-center mt-12">
-          <Button variant="hero" size="lg" onClick={() => navigate('/services')}>
-            View All Services
-            <ArrowRight className="w-5 h-5" />
-          </Button>
-        </div>
+        <ServiceCardGallery
+          services={services}
+          onServiceClick={(svc: ServiceItem) => {
+            if (onBookService) {
+              onBookService({ title: svc.title, type: selectedType });
+              return;
+            }
+            navigate('/services', {
+              state: {
+                selectedService: {
+                  title: svc.title,
+                  price: svc.price,
+                  warranty: svc.warranty,
+                },
+                deviceType: selectedType,
+              },
+            });
+          }}
+        />
       </div>
     </section>
   );
@@ -439,40 +460,34 @@ const HowItWorksSection = () => {
   ];
 
   return (
-    <section id="how-it-works" className="py-12 sm:py-20 lg:py-28 bg-muted/50">
+    <section id="how-it-works" className="py-16 sm:py-24 lg:py-32">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-4 sm:mb-6">
-            <Wrench className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium text-accent">How It Works</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+          <p className="text-sm font-semibold tracking-widest text-blue-500 uppercase mb-3">How It Works</p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 tracking-tight">
             Repair in 4 Easy Steps
           </h2>
-          <p className="text-lg text-muted-foreground">
-            Getting your laptop repaired has never been easier. Follow these simple steps
-            and we'll handle the rest.
+          <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 leading-relaxed">
+            Getting your laptop repaired has never been easier. Follow these simple steps and we'll handle the rest.
           </p>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-3 gap-y-6 sm:gap-8 items-stretch">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-8">
           {steps.map((step, index) => (
             <div key={step.step} className="relative group flex">
               {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-12 left-[60%] w-[80%] h-0.5 bg-border">
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary" />
-                </div>
+                <div className="hidden lg:block absolute top-10 left-[60%] w-[80%] h-px bg-gray-200 dark:bg-gray-700" />
               )}
-              <div className="relative bg-card rounded-xl sm:rounded-2xl p-3 sm:p-6 border border-border shadow-card group-hover:shadow-lg transition-all duration-300 w-full flex flex-col items-center text-center">
-                <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full gradient-hero text-primary-foreground text-xs sm:text-sm font-bold whitespace-nowrap">
-                  Step {step.step}
+              <div className="bg-white/80 dark:bg-card/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-300 w-full flex flex-col items-center text-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm sm:text-base font-bold mb-4">
+                  {step.step}
                 </div>
-                <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center mt-3 sm:mt-4 mb-2 sm:mb-5 group-hover:bg-primary/20 transition-colors">
-                  <step.icon className="w-5 h-5 sm:w-8 sm:h-8 text-primary" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mb-3">
+                  <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                 </div>
-                <h3 className="text-sm sm:text-xl font-display font-semibold text-foreground mb-1 sm:mb-2">
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white mb-1">
                   {step.title}
                 </h3>
-                <p className="text-xs sm:text-base text-muted-foreground flex-1 leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                   {step.description}
                 </p>
               </div>
@@ -753,43 +768,38 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className="py-12 sm:py-20 lg:py-28 bg-muted/50">
+    <section className="py-16 sm:py-24 lg:py-32">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4 sm:mb-6">
-            <Star className="w-4 h-4 text-primary fill-primary" />
-            <span className="text-sm font-medium text-primary">Customer Reviews</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+          <p className="text-sm font-semibold tracking-widest text-blue-500 uppercase mb-3">Customer Reviews</p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 tracking-tight">
             What Our Customers Say
           </h2>
-          <p className="text-lg text-muted-foreground">
-            Don't just take our word for it. Here's what our customers have to say
-            about their experience.
+          <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 leading-relaxed">
+            Don't just take our word for it. Here's what our customers have to say about their experience.
           </p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.name}
-              className="bg-card rounded-2xl p-5 sm:p-6 lg:p-8 border border-border shadow-card hover:shadow-lg transition-all duration-300"
+              className="bg-white/80 dark:bg-card/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-300"
             >
-              <Quote className="w-10 h-10 text-primary/20 mb-4" />
-              <p className="text-foreground mb-6 leading-relaxed">
-                "{testimonial.content}"
-              </p>
               <div className="flex gap-1 mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-warning fill-warning" />
+                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                 ))}
               </div>
-              <div className="flex items-center gap-4 pt-4 border-t border-border">
-                <div className="w-12 h-12 rounded-full gradient-hero flex items-center justify-center text-primary-foreground font-semibold">
+              <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed text-sm sm:text-base">
+                "{testimonial.content}"
+              </p>
+              <div className="flex items-center gap-3 pt-5 border-t border-gray-100 dark:border-gray-800">
+                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-semibold">
                   {testimonial.avatar}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground">{testimonial.name}</h4>
-                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{testimonial.name}</h4>
+                  <p className="text-xs text-gray-400">{testimonial.role}</p>
                 </div>
               </div>
             </div>
@@ -844,47 +854,51 @@ const CTASection = ({ onBookRepair }: { onBookRepair?: () => void }) => {
 
   return (
     <>
-      <section id="contact" className="py-12 sm:py-20 lg:py-28 gradient-hero relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl" />
-        </div>
+      <section id="contact" className="py-16 sm:py-24 lg:py-32 relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-primary-foreground mb-6">
+            <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-4 py-1.5 mb-5">
+              <Phone className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium text-primary">Get in Touch</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-5 tracking-tight">
               Ready to Get Your Laptop Fixed?
             </h2>
-            <p className="text-lg md:text-xl text-primary-foreground/80 mb-10">
-              Book a repair now and get your laptop working like new.
-              Our experts are just a call away.
+            <p className="text-base sm:text-lg text-muted-foreground mb-10 leading-relaxed">
+              Book a repair now and get your laptop working like new. Our experts are just a call away.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button variant="heroOutline" size="xl" onClick={() => setShowContactModal(true)}>
-                <Phone className="w-5 h-5" />
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-xl border-gray-300 text-foreground hover:bg-gray-50 px-8"
+                onClick={() => setShowContactModal(true)}
+              >
+                <Phone className="w-4 h-4 mr-2" />
                 Call Us Now
               </Button>
               <Button
-                size="xl"
-                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg"
+                size="lg"
+                className="rounded-xl bg-primary hover:bg-primary/90 text-white px-8 shadow-lg shadow-primary/20"
                 onClick={onBookRepair}
               >
                 Book Repair Online
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
-            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-primary-foreground/70 text-sm sm:text-base">
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 text-muted-foreground text-sm">
               <button
                 type="button"
-                className="flex items-center gap-2 hover:text-primary-foreground transition-colors"
+                className="flex items-center gap-2 hover:text-foreground transition-colors"
                 onClick={() => setShowContactModal(true)}
               >
                 <Phone className="w-4 h-4" />
                 {phoneNumber}
               </button>
-              <span>�</span>
+              <span className="hidden sm:inline text-gray-300">&bull;</span>
               <button
                 type="button"
-                className="flex items-center gap-2 hover:text-primary-foreground transition-colors"
+                className="flex items-center gap-2 hover:text-foreground transition-colors"
                 onClick={() => setShowContactModal(true)}
               >
                 <MessageCircle className="w-4 h-4" />

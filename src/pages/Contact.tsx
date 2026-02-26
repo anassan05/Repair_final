@@ -10,7 +10,7 @@ interface ContactProps {
 
 const Contact = ({ currentUser }: ContactProps) => {
   return (
-    <div className="min-h-screen bg-white dark:bg-background text-foreground page-enter">
+    <div className="min-h-screen relative z-[1] text-foreground page-enter">
       <Header />
 
       <main className="pt-20 pb-8">
