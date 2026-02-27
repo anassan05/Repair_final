@@ -254,7 +254,7 @@ const StatsSection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-10 sm:py-16 relative">
+    <section ref={sectionRef} className="py-10 sm:py-16 relative bg-blue-100 dark:bg-blue-950/40 rounded-2xl mx-2 sm:mx-4">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
           {stats.map((stat, index) => (
@@ -263,7 +263,7 @@ const StatsSection = () => {
               className="text-center animate-fade-up"
               style={{ animationDelay: `${index * 0.1}s`, opacity: isVisible ? 1 : 0 }}
             >
-              <div className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-blue-500 dark:text-blue-400 mb-1 sm:mb-2">
+              <div className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-blue-600 dark:text-blue-400 mb-1 sm:mb-2">
                 {isVisible ? (
                   <CountUp
                     end={stat.value}
@@ -274,7 +274,7 @@ const StatsSection = () => {
                   "0"
                 )}
               </div>
-              <p className="text-sm md:text-base text-muted-foreground">{stat.label}</p>
+              <p className="text-sm md:text-base text-blue-800/70 dark:text-blue-300/70">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -851,7 +851,7 @@ const CTASection = ({ onBookRepair }: { onBookRepair?: () => void }) => {
 
   return (
     <>
-      <section id="contact" className="py-16 sm:py-24 lg:py-32 relative overflow-hidden">
+      <section id="contact" className="py-16 sm:py-24 lg:py-32 relative overflow-hidden bg-blue-100 dark:bg-blue-950/40">
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-4 py-1.5 mb-5">

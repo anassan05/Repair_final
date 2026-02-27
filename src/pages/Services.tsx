@@ -112,24 +112,24 @@ const Services = ({ currentUser }: ServicesProps) => {
               </Button>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-4xl mx-auto mt-6 sm:mt-8">
+          <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-4xl mx-auto mt-6 sm:mt-8 bg-blue-100 dark:bg-blue-950/40 rounded-2xl p-4 sm:p-8">
             <div className="text-center space-y-2 sm:space-y-3">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto">
-                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 dark:text-blue-400" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mx-auto">
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-gray-700 dark:text-gray-200 font-semibold text-xs sm:text-base">Guaranteed Warranty</p>
+              <p className="text-blue-800/70 dark:text-blue-300/70 font-semibold text-xs sm:text-base">Guaranteed Warranty</p>
             </div>
             <div className="text-center space-y-2 sm:space-y-3">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto">
-                <Award className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 dark:text-blue-400" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mx-auto">
+                <Award className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-gray-700 dark:text-gray-200 font-semibold text-xs sm:text-base">Verified Technicians</p>
+              <p className="text-blue-800/70 dark:text-blue-300/70 font-semibold text-xs sm:text-base">Verified Technicians</p>
             </div>
             <div className="text-center space-y-2 sm:space-y-3">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto">
-                <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 dark:text-blue-400" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mx-auto">
+                <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-gray-700 dark:text-gray-200 font-semibold text-xs sm:text-base">Same Day Service</p>
+              <p className="text-blue-800/70 dark:text-blue-300/70 font-semibold text-xs sm:text-base">Same Day Service</p>
             </div>
           </div>
         </div>
