@@ -1,0 +1,7 @@
+{
+  "name": "user-module",
+  "private": true,
+  "scripts": {
+    "dev": "cd ../.. && npm run dev"
+  }
+}

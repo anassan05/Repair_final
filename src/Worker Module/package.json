@@ -1,0 +1,7 @@
+{
+  "name": "worker-module",
+  "private": true,
+  "scripts": {
+    "dev": "cd ../.. && npm run dev:worker"
+  }
+}

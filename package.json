@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:worker": "vite --config vite.worker.config.ts",
     "build": "vite build",
+    "build:worker": "vite build --config vite.worker.config.ts",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

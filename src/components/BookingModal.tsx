@@ -82,6 +82,45 @@ const pcRepairIssues = [
   { icon: Shield, label: "Not Sure / Need Diagnosis", description: "Let our technician identify the issue", price: "Free Checkup", image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=240&q=80" },
 ];
 
+const parseIssuePriceRange = (priceText: string): { min: number; max: number } => {
+  if (!priceText || /free/i.test(priceText)) return { min: 0, max: 0 };
+  const nums = priceText
+    .replace(/₹|,|INR/gi, "")
+    .split("-")
+    .map((v) => Number.parseInt(v.replace(/[^\d]/g, ""), 10))
+    .filter((n) => Number.isFinite(n));
+
+  if (nums.length === 0) return { min: 0, max: 0 };
+  if (nums.length === 1) return { min: nums[0], max: nums[0] };
+  return { min: Math.min(nums[0], nums[1]), max: Math.max(nums[0], nums[1]) };
+};
+
+const formatINRCompact = (amount: number): string =>
+  `₹${Math.max(0, Math.round(amount)).toLocaleString("en-IN")}`;
+
+const estimateCostFromSelectedIssues = (
+  selected: string[],
+  issues: { label: string; price: string }[]
+): string => {
+  if (!selected.length) return "₹0";
+
+  const totals = selected.reduce(
+    (acc, label) => {
+      const matched = issues.find((issue) => issue.label === label);
+      if (!matched) return acc;
+      const range = parseIssuePriceRange(matched.price);
+      acc.min += range.min;
+      acc.max += range.max;
+      return acc;
+    },
+    { min: 0, max: 0 }
+  );
+
+  if (totals.min === 0 && totals.max === 0) return "Free Checkup";
+  if (totals.min === totals.max) return formatINRCompact(totals.min);
+  return `${formatINRCompact(totals.min)} - ${formatINRCompact(totals.max)}`;
+};
+
 // Mapping from service page titles to booking modal issue labels
 const serviceToIssueMapping: { [key: string]: { laptop: string; pc: string } } = {
   "Screen Replacement": { laptop: "Screen Issue", pc: "Display Issue" },
@@ -129,17 +168,18 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
 
   // Handle modal state and preselected service
   useEffect(() => {
-    console.log('BookingModal useEffect triggered:', { isOpen, preselectedService, currentUser: currentUser?.name });
-    
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.classList.add('booking-modal-open');
+      window.dispatchEvent(new Event('booking-modal-visibility-change'));
     } else {
       document.body.style.overflow = '';
+      document.body.classList.remove('booking-modal-open');
+      window.dispatchEvent(new Event('booking-modal-visibility-change'));
     }
 
     if (!isOpen) {
       // Reset all states when modal closes
-      console.log('Modal closing - resetting state');
       setStep(0);
       setDeviceType("");
       setSelectedBrand("");
@@ -187,7 +227,11 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
       setStep(0);
     }
 
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+      document.body.classList.remove('booking-modal-open');
+      window.dispatchEvent(new Event('booking-modal-visibility-change'));
+    };
   }, [isOpen, preselectedService, currentUser]);
 
   // Reset scroll position when step changes
@@ -243,6 +287,8 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
   };
 
   const handleSubmit = async () => {
+    const estimatedCost = estimateCostFromSelectedIssues(selectedIssues, repairIssues);
+
     // Get selected address details
     let addressDetails = "";
     if (useNewAddress) {
@@ -300,6 +346,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
       customerPhone: formData.phone,
       customerAddress: addressDetails,
       service: `${deviceType === "laptop" ? "Laptop" : "Desktop PC"} - ${selectedBrand} - ${selectedIssues.join(", ")}`,
+      estimatedCost,
       date: new Date().toISOString().split('T')[0],
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
       description: formData.description,
@@ -334,7 +381,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
       issue: selectedIssues.join(", ") || "General Service",
       date: new Date().toISOString(),
       status: "Active",
-      cost: "₹0",
+      cost: estimatedCost,
       discount: "₹0",
       rating: 0,
       otp: dummyOtp,
@@ -358,21 +405,23 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
 
   if (!isOpen) return null;
 
-  console.log('Rendering BookingModal - Step:', step, 'DeviceType:', deviceType, 'Issues:', selectedIssues);
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 lg:p-4 animate-in fade-in duration-300">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-black/80 backdrop-blur-lg" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/75" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-gradient-to-br from-card via-card to-card/95 rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-2xl lg:max-w-3xl max-h-[85vh] lg:max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-300 border-2 border-primary/10 mx-auto">
+      <div className="relative bg-card rounded-2xl lg:rounded-3xl shadow-xl w-full max-w-2xl lg:max-w-3xl max-h-[85vh] lg:max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-300 border border-border/70 mx-auto">
         {/* Scrollable Content */}
-        <div ref={scrollRef} className="max-h-[85vh] lg:max-h-[85vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
+        <div
+          ref={scrollRef}
+          className="max-h-[85vh] lg:max-h-[85vh] overflow-y-auto overscroll-contain [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch]"
+          style={{ contain: "layout paint style" }}
+        >
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-3 lg:top-6 right-3 lg:right-6 w-9 h-9 lg:w-11 lg:h-11 rounded-full bg-background/90 backdrop-blur-sm border-2 border-border/50 flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive hover:scale-110 hover:rotate-90 transition-all duration-300 z-20 shadow-xl"
+            className="absolute top-3 lg:top-6 right-3 lg:right-6 w-9 h-9 lg:w-11 lg:h-11 rounded-full bg-background/90 border-2 border-border/50 flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive hover:scale-110 hover:rotate-90 transition-all duration-300 z-20 shadow-xl"
           >
             <X className="w-4 h-4 lg:w-5 lg:h-5" />
           </button>
@@ -560,7 +609,7 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
               {/* Header with floating count */}
               <div className="text-center relative">
                 <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-4 py-1.5 mb-3">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-primary" />
                   <span className="text-xs font-medium text-primary">Step 3 of 5</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1">
@@ -572,24 +621,24 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
               </div>
 
               {/* Service cards — innovative stacked layout */}
-              <div className="space-y-2.5 sm:space-y-3">
+              <div className="space-y-2.5 sm:space-y-3" style={{ contain: "content" }}>
                 {repairIssues.map((issue) => {
                   const isSelected = selectedIssues.includes(issue.label);
                   return (
                     <button
                       key={issue.label}
                       onClick={() => toggleIssue(issue.label)}
-                      className={`w-full flex items-center gap-3 sm:gap-4 rounded-2xl border-2 p-3 sm:p-4 text-left transition-all duration-300 group ${
+                      className={`w-full flex items-center gap-3 sm:gap-4 rounded-2xl border-2 p-3 sm:p-4 text-left transition-colors duration-150 active:scale-[0.995] group ${
                         isSelected
-                          ? "border-primary bg-gradient-to-r from-primary/5 via-primary/3 to-transparent shadow-lg shadow-primary/10 scale-[1.01]"
-                          : "border-transparent bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:border-gray-200"
+                          ? "border-primary/80 bg-primary/[0.06]"
+                          : "border-border/60 bg-muted/30 hover:bg-muted/40 hover:border-primary/40 active:bg-muted/50"
                       }`}
                     >
                       {/* Icon */}
-                      <div className={`relative shrink-0 h-11 w-11 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                      <div className={`relative shrink-0 h-11 w-11 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center transition-colors duration-150 ${
                         isSelected
-                          ? "bg-primary text-white shadow-md shadow-primary/30 rotate-0"
-                          : "bg-white dark:bg-gray-800 text-gray-400 group-hover:text-primary group-hover:shadow-sm border border-gray-100 dark:border-gray-700"
+                          ? "bg-primary text-white"
+                          : "bg-card text-muted-foreground border border-border/60 group-hover:text-primary"
                       }`}>
                         <issue.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                       </div>
@@ -597,13 +646,13 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
                       {/* Text */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className={`text-sm sm:text-base font-semibold truncate transition-colors ${
+                          <p className={`text-sm sm:text-base font-semibold truncate transition-colors duration-150 ${
                             isSelected ? "text-primary" : "text-foreground"
                           }`}>
                             {issue.label}
                           </p>
                           {issue.price === "Free Checkup" && (
-                            <span className="shrink-0 text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-md uppercase tracking-wide">
+                            <span className="shrink-0 text-[10px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-md uppercase tracking-wide">
                               Free
                             </span>
                           )}
@@ -615,15 +664,15 @@ const BookingModal = ({ isOpen, onClose, currentUser, preselectedService }: Book
 
                       {/* Price + check */}
                       <div className="shrink-0 flex items-center gap-2.5">
-                        <span className={`hidden sm:block text-xs font-semibold transition-colors ${
+                        <span className={`hidden sm:block text-xs font-semibold ${
                           isSelected ? "text-primary" : "text-muted-foreground"
                         }`}>
                           {issue.price}
                         </span>
-                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors duration-150 ${
                           isSelected
-                            ? "border-primary bg-primary text-white scale-110"
-                            : "border-gray-300 dark:border-gray-600 group-hover:border-primary/40"
+                            ? "border-primary bg-primary text-white"
+                            : "border-muted-foreground/50 group-hover:border-primary/50"
                         }`}>
                           {isSelected && <Check className="h-3.5 w-3.5" />}
                         </div>

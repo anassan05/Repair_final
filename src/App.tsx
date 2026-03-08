@@ -1,16 +1,16 @@
-﻿import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Index from "./pages/Index";
-import Profile from "./pages/Profile";
-import Membership from "./pages/Membership";
-import Contact from "./pages/Contact";
-import Services from "./pages/Services";
-import UserLogin from "./pages/UserLogin";
-import NotFound from "./pages/NotFound";
+import Index from "./User Module/Index";
+import Profile from "./User Module/Profile";
+import Membership from "./User Module/Membership";
+import Contact from "./User Module/Contact";
+import Services from "./User Module/Services";
+import UserLogin from "./User Module/UserLogin";
+import NotFound from "./User Module/NotFound";
 import IconTest from "./components/ImageTest";
 import ParticleCanvas from "./components/ParticleCanvas";
 import FloatingBubbles from "./components/FloatingBubbles";
@@ -24,6 +24,9 @@ const ConditionalParticles = () => {
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false
   );
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(
+    typeof document !== "undefined" ? document.body.classList.contains("booking-modal-open") : false
+  );
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -31,7 +34,17 @@ const ConditionalParticles = () => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  if (pathname === "/profile" || pathname === "/services") return null;
+  useEffect(() => {
+    const onBookingModalVisibilityChange = () => {
+      setIsBookingModalOpen(document.body.classList.contains("booking-modal-open"));
+    };
+    window.addEventListener("booking-modal-visibility-change", onBookingModalVisibilityChange);
+    return () => {
+      window.removeEventListener("booking-modal-visibility-change", onBookingModalVisibilityChange);
+    };
+  }, []);
+
+  if (isMobile || isBookingModalOpen || pathname === "/profile" || pathname === "/services") return null;
   return (
     <>
       <FloatingBubbles />

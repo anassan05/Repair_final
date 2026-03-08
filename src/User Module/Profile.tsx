@@ -33,6 +33,20 @@ import { indianStatesAndDistricts, allStates } from "@/data/indianLocations";
 import { useToast } from "@/hooks/use-toast";
 
 const USER_BOOKINGS_KEY = "userBookings";
+const ISSUE_ESTIMATE_MAP: Record<string, { min: number; max: number }> = {
+  "Screen Issue": { min: 2499, max: 5999 },
+  "Battery Problem": { min: 1999, max: 3999 },
+  "Keyboard Fix": { min: 999, max: 2499 },
+  "Storage/HDD": { min: 1499, max: 4999 },
+  Motherboard: { min: 2999, max: 7999 },
+  "WiFi/Network": { min: 799, max: 1999 },
+  "Not Sure / Need Diagnosis": { min: 0, max: 0 },
+  "Display Issue": { min: 1999, max: 4999 },
+  "CPU Problem": { min: 2499, max: 6999 },
+  "Network Card": { min: 999, max: 2499 },
+  "Graphics Card": { min: 2999, max: 9999 },
+  "General Service": { min: 0, max: 0 },
+};
 const LEGACY_DUMMY_ADDRESS_KEYS = new Set([
   "home|123 tech street, bangalore|bangalore|karnataka|560001",
   "office|45 business park, mg road|bangalore|karnataka|560002",
@@ -115,6 +129,32 @@ const getInitialProfile = (currentUser: { name: string; phone: string }) => {
   };
 };
 
+const formatINRCompact = (amount: number): string =>
+  `₹${Math.max(0, Math.round(amount)).toLocaleString("en-IN")}`;
+
+const estimateCostFromIssueText = (issueText: unknown): string | null => {
+  if (typeof issueText !== "string" || !issueText.trim()) return null;
+  const issueParts = issueText.split(",").map((part) => part.trim()).filter(Boolean);
+  if (!issueParts.length) return null;
+
+  const totals = issueParts.reduce(
+    (acc, part) => {
+      const range = ISSUE_ESTIMATE_MAP[part];
+      if (!range) return acc;
+      acc.min += range.min;
+      acc.max += range.max;
+      acc.matched += 1;
+      return acc;
+    },
+    { min: 0, max: 0, matched: 0 }
+  );
+
+  if (!totals.matched) return null;
+  if (totals.min === 0 && totals.max === 0) return "Free Checkup";
+  if (totals.min === totals.max) return formatINRCompact(totals.min);
+  return `${formatINRCompact(totals.min)} - ${formatINRCompact(totals.max)}`;
+};
+
 const getStoredBookingsForUser = (phone: string) => {
   const storedBookingsRaw = sessionStorage.getItem(USER_BOOKINGS_KEY);
   if (!storedBookingsRaw) return [];
@@ -122,11 +162,22 @@ const getStoredBookingsForUser = (phone: string) => {
   try {
     const parsed = JSON.parse(storedBookingsRaw);
     const allBookings = Array.isArray(parsed) ? parsed : [];
-    return allBookings.filter((booking: any) => {
-      if (!booking || typeof booking !== "object") return false;
-      if (booking.customerPhone) return booking.customerPhone === phone;
-      return true;
-    });
+    return allBookings
+      .filter((booking: any) => {
+        if (!booking || typeof booking !== "object") return false;
+        if (booking.customerPhone) return booking.customerPhone === phone;
+        return true;
+      })
+      .map((booking: any) => {
+        const rawCost = typeof booking.cost === "string" ? booking.cost : "";
+        const normalizedCost = rawCost.replace(/â‚¹/g, "₹").trim();
+        const hasRealCost = normalizedCost !== "" && normalizedCost !== "₹0" && normalizedCost !== "0";
+        if (hasRealCost) return booking;
+
+        const estimatedCost = estimateCostFromIssueText(booking.issue);
+        if (!estimatedCost) return booking;
+        return { ...booking, cost: estimatedCost };
+      });
   } catch {
     return [];
   }

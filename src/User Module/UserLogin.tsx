@@ -196,4 +196,3 @@ const UserLogin = ({ onLogin }: LoginProps) => {
 };
 
 export default UserLogin;
-
