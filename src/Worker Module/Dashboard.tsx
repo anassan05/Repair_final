@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 type BookingStatus = "assigned" | "completed";
 
@@ -25,6 +26,7 @@ const initialBookings: BookingItem[] = [
 ];
 
 const WorkerDashboard = ({ currentWorker, onLogout }: WorkerDashboardProps) => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingItem[]>(initialBookings);
 
   const assignedBookings = useMemo(
@@ -50,12 +52,10 @@ const WorkerDashboard = ({ currentWorker, onLogout }: WorkerDashboardProps) => {
 
           <nav className="worker-nav-links">
             <button type="button" className="worker-nav-link active">Dashboard</button>
-            <button type="button" className="worker-nav-link">Bookings</button>
-            <button type="button" className="worker-nav-link">History</button>
+            <button type="button" className="worker-nav-link" onClick={() => navigate("/profile")}>Profile</button>
           </nav>
 
           <div className="worker-nav-actions">
-            <button type="button" className="worker-btn-outline">Profile</button>
             <button type="button" className="worker-btn-ghost" onClick={onLogout}>Logout</button>
           </div>
         </div>

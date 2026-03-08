@@ -25,7 +25,7 @@ h1, h2, h3, h4, h5, h6 {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: radial-gradient(circle at 20% 20%, #052e16 0%, #0a1a0f 45%, #020617 100%);
+  background: #0b0f19;
   color: #e2e8f0;
 }
 
@@ -87,7 +87,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .dashboard-page {
   min-height: 100vh;
-  background: radial-gradient(circle at 20% 20%, #052e16 0%, #0a1a0f 45%, #020617 100%);
+  background: #0b0f19;
   color: #e2e8f0;
 }
 
@@ -341,5 +341,319 @@ h1, h2, h3, h4, h5, h6 {
 
   .dashboard-topbar h1 {
     font-size: 28px;
+  }
+}
+
+/* ============================
+   Profile Page
+   ============================ */
+.profile-page {
+  min-height: 100vh;
+  background: #0b0f19;
+  color: #e2e8f0;
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* Top bar */
+.profile-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 20px;
+}
+
+.profile-topbar-title {
+  font-size: 26px;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.profile-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Profile card */
+.profile-card {
+  border: 1px solid #1e293b;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.72);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.profile-card-top {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #1e293b;
+  color: #cbd5e1;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.profile-info h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #f8fafc;
+}
+
+.profile-worker-id {
+  margin: 4px 0 10px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.profile-badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-badge {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #334155;
+  color: #e2e8f0;
+}
+
+.rating-badge {
+  color: #fbbf24;
+}
+
+.jobs-badge {
+  color: #86efac;
+}
+
+/* Stats grid */
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-stat-card {
+  border: 1px solid #1e293b;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.72);
+  padding: 20px;
+}
+
+.stat-label {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.stat-value {
+  margin: 8px 0 0;
+  font-size: 30px;
+  color: #f8fafc;
+}
+
+.stat-star {
+  font-size: 22px;
+}
+
+/* Work History section */
+.work-history-section {
+  border: 1px solid #1e293b;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.72);
+  padding: 28px;
+}
+
+.work-history-section h3 {
+  font-size: 22px;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.work-history-sub {
+  margin: 4px 0 18px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Tabs */
+.work-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.work-tab {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.work-tab:hover {
+  border-color: #22c55e;
+  color: #86efac;
+}
+
+.work-tab.active {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+/* Work list */
+.work-list {
+  display: grid;
+  gap: 16px;
+}
+
+.work-card {
+  display: flex;
+  gap: 20px;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #0f172a, #020617);
+  overflow: hidden;
+}
+
+.work-card-image {
+  width: 240px;
+  min-height: 180px;
+  flex-shrink: 0;
+  background: #1e293b;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.work-card-details {
+  flex: 1;
+  padding: 18px 18px 18px 0;
+}
+
+.work-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.work-card-header h4 {
+  margin: 0;
+  font-size: 18px;
+  color: #f8fafc;
+}
+
+.work-booking-id {
+  margin: 2px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.star-rating {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  font-size: 16px;
+  color: #334155;
+}
+
+.star.filled {
+  color: #fbbf24;
+}
+
+.work-card-meta {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  color: #cbd5e1;
+  margin-bottom: 10px;
+}
+
+.work-card-meta strong {
+  color: #f8fafc;
+}
+
+.warranty-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* Profile responsive */
+@media (max-width: 900px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .work-card {
+    flex-direction: column;
+  }
+
+  .work-card-image {
+    width: 100%;
+    min-height: 140px;
+  }
+
+  .work-card-details {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .profile-card-top {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-badges {
+    justify-content: center;
+  }
+
+  .profile-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .work-card-header {
+    flex-direction: column;
+    gap: 8px;
   }
 }

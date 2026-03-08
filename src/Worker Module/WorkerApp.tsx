@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useState } from "react";
 import WorkerLogin from "./WorkerLogin";
 import WorkerDashboard from "./Dashboard";
+import WorkerProfile from "./Profile";
 import GreenFloatingBubbles from "./ui/GreenFloatingBubbles";
 import GreenParticleCanvas from "./ui/GreenParticleCanvas";
 
@@ -39,6 +40,22 @@ function WorkerApp() {
         element={
           worker ? (
             <WorkerDashboard
+              currentWorker={worker}
+              onLogout={() => {
+                localStorage.removeItem("workerUser");
+                setWorker(null);
+              }}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          worker ? (
+            <WorkerProfile
               currentWorker={worker}
               onLogout={() => {
                 localStorage.removeItem("workerUser");
