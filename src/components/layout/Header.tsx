@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Menu, X, Phone, User, Wrench } from "lucide-react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -128,6 +129,14 @@ const Header = ({ onBookRepair }: HeaderProps) => {
     document.body.classList.remove('is-scrolling');
   }, [location.pathname, location.hash]);
 
+  useEffect(() => {
+    document.body.classList.toggle("contact-modal-open", showContactModal);
+
+    return () => {
+      document.body.classList.remove("contact-modal-open");
+    };
+  }, [showContactModal]);
+
   const phoneNumber = "+91 12345 67890";
 
   const handleCall = () => {
@@ -164,7 +173,40 @@ const Header = ({ onBookRepair }: HeaderProps) => {
     }
   };
 
+  const contactModal = showContactModal ? createPortal(
+    <div
+      className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/35 backdrop-blur-md"
+      onClick={() => setShowContactModal(false)}
+    >
+      <div
+        className="relative bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 w-[90vw] max-w-xs flex flex-col items-center gap-4"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          onClick={() => setShowContactModal(false)}
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+          aria-label="Close contact popup"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <div className="flex items-center gap-2">
+          <Phone className="w-5 h-5 text-blue-500" />
+          <span className="font-semibold text-lg">Contact TECH-FIX</span>
+        </div>
+        <div className="text-center text-sm text-muted-foreground">{phoneNumber}</div>
+        <div className="flex gap-2 w-full">
+          <Button variant="hero" size="sm" className="flex-1" onClick={handleCall}>Call</Button>
+          <Button variant="outline" size="sm" className="flex-1" onClick={handleWhatsApp}>WhatsApp</Button>
+          <Button variant="ghost" size="sm" className="flex-1" onClick={handleCopy}>Copy</Button>
+        </div>
+        <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => setShowContactModal(false)}>Close</Button>
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
   return (
+    <>
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-[#10151b]/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-800 shadow-lg animate-slide-down">
       <div className="container mx-auto px-3 lg:px-4">
         <div className="flex items-center justify-between h-14 lg:h-20">
@@ -264,25 +306,10 @@ const Header = ({ onBookRepair }: HeaderProps) => {
             </nav>
           </div>
         )}
-        {showContactModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 w-[90vw] max-w-xs flex flex-col items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Phone className="w-5 h-5 text-blue-500" />
-                <span className="font-semibold text-lg">Contact TECH-FIX</span>
-              </div>
-              <div className="text-center text-sm text-muted-foreground">{phoneNumber}</div>
-              <div className="flex gap-2 w-full">
-                <Button variant="hero" size="sm" className="flex-1" onClick={handleCall}>Call</Button>
-                <Button variant="outline" size="sm" className="flex-1" onClick={handleWhatsApp}>WhatsApp</Button>
-                <Button variant="ghost" size="sm" className="flex-1" onClick={handleCopy}>Copy</Button>
-              </div>
-              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => setShowContactModal(false)}>Close</Button>
-            </div>
-          </div>
-        )}
       </div>
     </header>
+    {contactModal}
+    </>
   );
 };
 

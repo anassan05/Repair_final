@@ -813,6 +813,14 @@ const CTASection = ({ onBookRepair }: { onBookRepair?: () => void }) => {
   const [showContactModal, setShowContactModal] = useState(false);
   const phoneNumber = "+91 12345 67890";
 
+  useEffect(() => {
+    document.body.classList.toggle("contact-modal-open", showContactModal);
+
+    return () => {
+      document.body.classList.remove("contact-modal-open");
+    };
+  }, [showContactModal]);
+
   const handleCall = () => {
     window.open(`tel:${phoneNumber.replace(/[^\d]/g, "")}`);
   };
@@ -907,8 +915,14 @@ const CTASection = ({ onBookRepair }: { onBookRepair?: () => void }) => {
       </section>
 
       {showContactModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
-          <div className="relative bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 w-[90vw] max-w-xs flex flex-col items-center gap-4">
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/35 backdrop-blur-md p-4"
+          onClick={() => setShowContactModal(false)}
+        >
+          <div
+            className="relative bg-white dark:bg-slate-900 rounded-xl shadow-xl p-6 w-[90vw] max-w-xs flex flex-col items-center gap-4"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               onClick={() => setShowContactModal(false)}
               className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
