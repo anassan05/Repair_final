@@ -1,6 +1,7 @@
 
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import AdminApp from "./Admin Module/AdminApp.tsx";
 import "./index.css";
 
 // Apply theme with dark as default, but respect persisted preference
@@ -24,4 +25,9 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (ev
 	applyTheme(event.matches ? 'dark' : 'light');
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+const pathname = window.location.pathname.toLowerCase();
+const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
+
+createRoot(document.getElementById("root")!).render(
+  isAdminPath ? <AdminApp /> : <App />
+);

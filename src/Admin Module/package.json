@@ -1,0 +1,7 @@
+{
+  "name": "admin-module",
+  "private": true,
+  "scripts": {
+    "dev": "cd ../.. && npm run dev:admin"
+  }
+}

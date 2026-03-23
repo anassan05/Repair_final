@@ -1,10 +1,9 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useState } from "react";
 import WorkerLogin from "./WorkerLogin";
 import WorkerDashboard from "./Dashboard";
 import WorkerProfile from "./Profile";
 import GreenFloatingBubbles from "./ui/GreenFloatingBubbles";
-import GreenParticleCanvas from "./ui/GreenParticleCanvas";
 
 export interface WorkerUser {
   name: string;
@@ -24,19 +23,23 @@ const getCurrentWorker = (): WorkerUser | null => {
 };
 
 function WorkerApp() {
+  const location = useLocation();
   const [worker, setWorker] = useState<WorkerUser | null>(() => getCurrentWorker());
+  const workerLoginPath = "/worker/login";
+  const workerDashboardPath = "/worker/dashboard";
+  const workerProfilePath = "/worker/profile";
+  const isLoginRoute = location.pathname === workerLoginPath || location.pathname === "/login";
 
   return (
     <>
-      <GreenFloatingBubbles />
-      <GreenParticleCanvas />
+      {isLoginRoute && <GreenFloatingBubbles />}
       <Routes>
       <Route
-        path="/login"
-        element={worker ? <Navigate to="/dashboard" replace /> : <WorkerLogin onLogin={setWorker} />}
+        path={workerLoginPath}
+        element={worker ? <Navigate to={workerDashboardPath} replace /> : <WorkerLogin onLogin={setWorker} />}
       />
       <Route
-        path="/dashboard"
+        path={workerDashboardPath}
         element={
           worker ? (
             <WorkerDashboard
@@ -52,7 +55,7 @@ function WorkerApp() {
         }
       />
       <Route
-        path="/profile"
+        path={workerProfilePath}
         element={
           worker ? (
             <WorkerProfile
@@ -67,7 +70,10 @@ function WorkerApp() {
           )
         }
       />
-      <Route path="*" element={<Navigate to={worker ? "/dashboard" : "/login"} replace />} />
+      <Route path="/login" element={<Navigate to={workerLoginPath} replace />} />
+      <Route path="/dashboard" element={<Navigate to={workerDashboardPath} replace />} />
+      <Route path="/profile" element={<Navigate to={workerProfilePath} replace />} />
+      <Route path="*" element={<Navigate to={worker ? workerDashboardPath : workerLoginPath} replace />} />
     </Routes>
     </>
   );

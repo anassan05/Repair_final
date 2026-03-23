@@ -15,7 +15,7 @@ interface Bubble {
   hue: number;
 }
 
-const BUBBLE_COUNT = 5;
+const BUBBLE_COUNT = 8;
 
 const GreenFloatingBubbles = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,8 +38,8 @@ const GreenFloatingBubbles = () => {
           y,
           baseX: x,
           baseY: y,
-          radius: 120 + Math.random() * 220,
-          opacity: 0.025 + Math.random() * 0.035,
+          radius: 150 + Math.random() * 250,
+          opacity: 0.12 + Math.random() * 0.1,
           speedX: (Math.random() - 0.5) * 0.3,
           speedY: (Math.random() - 0.5) * 0.3,
           phase: Math.random() * Math.PI * 2,
@@ -73,7 +73,7 @@ const GreenFloatingBubbles = () => {
 
       const t = performance.now() * 0.001;
       const isMobile = w < 768;
-      const globalAlpha = isMobile ? 0.4 : 1;
+      const globalAlpha = isMobile ? 0.55 : 1;
 
       for (const b of bubblesRef.current) {
         b.x = b.baseX + Math.sin(t * 0.15 + b.phase) * 60;
@@ -90,12 +90,12 @@ const GreenFloatingBubbles = () => {
         const breathe = 1 + Math.sin(t * 0.5 + b.phase) * 0.08;
         const r = b.radius * breathe;
 
-        const alpha = b.opacity * globalAlpha * 0.7;
+        const alpha = b.opacity * globalAlpha;
         const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        grad.addColorStop(0, `hsla(${b.hue}, 70%, 55%, ${alpha * 1.2})`);
-        grad.addColorStop(0.4, `hsla(${b.hue}, 60%, 60%, ${alpha * 0.7})`);
-        grad.addColorStop(0.7, `hsla(${b.hue}, 50%, 65%, ${alpha * 0.3})`);
-        grad.addColorStop(1, `hsla(${b.hue}, 40%, 70%, 0)`);
+        grad.addColorStop(0, `hsla(${b.hue}, 80%, 55%, ${alpha})`);
+        grad.addColorStop(0.4, `hsla(${b.hue}, 70%, 55%, ${alpha * 0.6})`);
+        grad.addColorStop(0.7, `hsla(${b.hue}, 60%, 60%, ${alpha * 0.25})`);
+        grad.addColorStop(1, `hsla(${b.hue}, 50%, 65%, 0)`);
 
         ctx.beginPath();
         ctx.arc(b.x, b.y, r, 0, Math.PI * 2);

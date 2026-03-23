@@ -11,6 +11,7 @@ import Contact from "./User Module/Contact";
 import Services from "./User Module/Services";
 import UserLogin from "./User Module/UserLogin";
 import NotFound from "./User Module/NotFound";
+import AdminApp from "./Admin Module/AdminApp";
 import IconTest from "./components/ImageTest";
 import ParticleCanvas from "./components/ParticleCanvas";
 import FloatingBubbles from "./components/FloatingBubbles";
@@ -44,7 +45,15 @@ const ConditionalParticles = () => {
     };
   }, []);
 
-  if (isMobile || isBookingModalOpen || pathname === "/profile" || pathname === "/services") return null;
+  if (
+    isMobile ||
+    isBookingModalOpen ||
+    pathname === "/profile" ||
+    pathname === "/services" ||
+    pathname.startsWith("/admin")
+  ) {
+    return null;
+  }
   return (
     <>
       <FloatingBubbles />
@@ -87,6 +96,7 @@ const App = () => {
         <BrowserRouter>
           <ConditionalParticles />
           <Routes>
+            <Route path="/admin/*" element={<AdminApp />} />
             <Route path="/login" element={
               currentUser ? <Navigate to="/" /> : <UserLogin onLogin={handleLogin} />
             } />

@@ -101,23 +101,25 @@ const WorkerProfile = ({ currentWorker, onLogout }: WorkerProfileProps) => {
       : completedWorks;
 
   return (
-    <div className="profile-page">
-      {/* Top bar */}
-      <header className="profile-topbar">
-        <h1 className="profile-topbar-title">Worker Profile</h1>
-        <div className="profile-topbar-actions">
-          <button
-            type="button"
-            className="worker-btn-outline"
-            onClick={() => navigate("/dashboard")}
-          >
-            ← Back to Dashboard
-          </button>
-          <button type="button" className="worker-btn-ghost" onClick={onLogout}>
-            ↪ Logout
-          </button>
+    <>
+      <header className="worker-navbar">
+        <div className="worker-navbar-inner">
+          <a href="/worker/dashboard" className="worker-logo">
+            CareMyLap<span className="worker-logo-accent">.com</span>
+          </a>
+
+          <nav className="worker-nav-links">
+            <button type="button" className="worker-nav-link" onClick={() => navigate("/worker/dashboard")}>Dashboard</button>
+            <button type="button" className="worker-nav-link active">Profile</button>
+          </nav>
+
+          <div className="worker-nav-actions">
+            <button type="button" className="worker-btn-ghost" onClick={onLogout}>Logout</button>
+          </div>
         </div>
       </header>
+
+      <div className="profile-page">
 
       {/* Profile card */}
       <section className="profile-card">
@@ -212,7 +214,8 @@ const WorkerProfile = ({ currentWorker, onLogout }: WorkerProfileProps) => {
           ))}
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 };
 
